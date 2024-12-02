@@ -1,23 +1,97 @@
 import config from './configs';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
-
+import passport, { Profile } from 'passport';
 import defineRoutes from './app';
 import { errorHandler } from './libraries/error-handling';
 import logger from './libraries/log/logger';
 import { addRequestIdMiddleware } from './middlewares/request-context';
 import { connectWithMongoDb } from './libraries/db';
+import cors from 'cors';
+import { getGithubStrategy } from './auth';
+import session from 'express-session';
 
 let connection: any;
 
+const handleAuthCallback = (strategy: string) => {
+  return [
+    function (req: Request, res: Response, next: NextFunction) {
+      passport.authenticate(
+        strategy,
+        {
+          failureRedirect: `${config.CLIENT_HOST}/login`
+        },
+        (err: Error, user: Profile) => {
+          if (err || !user) {
+            logger.error('Failed to authenticate user', err);
+            return res.redirect(
+              `${config.CLIENT_HOST}/login?error=${err?.name}`
+            );
+          }
+          req.logIn(user, function (err) {
+            if (err) {
+              return res.redirect(
+                `${config.CLIENT_HOST}/login?error=failed-to-authenticate`
+              );
+            }
+
+            // req.session.userId = user._id;
+            // req.session.sessionId = req.sessionID;
+            // req.session.save((err) => {
+            //   if (err) {
+            //     logger.error('Failed to save session', err);
+            //   } else {
+            //     logger.info('Session saved');
+            //   }
+            // });
+
+            next();
+          });
+        }
+      )(req, res, next);
+    },
+    function (req: Request, res: Response) {
+      if (strategy === 'github') {
+        logger.info('/api/auth/github/callback', {
+          //@ts-ignore
+          username: req?.user?.username as Profile['username']
+        });
+      }
+      //@ts-ignore
+      const userId = req?.user?._id.toString();
+      res.cookie('userId', userId, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax'
+      });
+      res.redirect(`${config.CLIENT_HOST}/login-success`);
+    }
+  ];
+};
+
 const createExpressApp = (): Application => {
   const expressApp = express();
-
   // Use middlewares
   expressApp.use(addRequestIdMiddleware);
   expressApp.use(helmet());
   expressApp.use(express.urlencoded({ extended: true }));
   expressApp.use(express.json());
+  expressApp.use(cors());
+
+  // passport js
+  passport.use(getGithubStrategy());
+
+  // Session middleware
+  expressApp.use(
+    session({
+      secret: config.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: true
+    })
+  );
+
+  expressApp.use(passport.initialize());
+  expressApp.use(passport.session());
 
   // Middleware to log an info message for each incoming request
   expressApp.use((req: Request, res: Response, next: NextFunction) => {
@@ -26,6 +100,13 @@ const createExpressApp = (): Application => {
   });
 
   logger.info('Express middlewares are set up');
+
+  // Authentication Routes
+  // Github authentication
+  expressApp.get('/api/auth/github', passport.authenticate('github'));
+
+  // Replace the GitHub callback route with:
+  expressApp.get('/api/auth/github/callback', ...handleAuthCallback('github'));
 
   // Define routes
   defineRoutes(expressApp);
@@ -72,7 +153,6 @@ const openConnection = async (
     logger.info(`Server is about to listen to port ${webServerPort}`);
 
     connection = expressApp.listen(webServerPort, () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       errorHandler.listenToErrorEvents(connection);
       const addressInfo = connection.address();
