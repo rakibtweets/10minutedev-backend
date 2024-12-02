@@ -10,6 +10,11 @@ function defineRoutes(expressApp: Application): void {
 
   expressApp.use('/api/v1', router);
 
+  // Default route
+  expressApp.get('/', (req: Request, res: Response) => {
+    console.log('Welcome to 10minutedev server');
+    res.send('Welcome to 10minutedev server');
+  });
   // Health check
   expressApp.get('/health', (req: Request, res: Response) => {
     res.send('OK');
