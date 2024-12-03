@@ -1,12 +1,9 @@
 import config from '../configs';
-import {
-  Strategy as GitHubStrategy,
-  StrategyOptions,
-  Profile
-} from 'passport-github2';
+import { Strategy as GitHubStrategy, StrategyOptions } from 'passport-github2';
+import { create, getByGitHubId, updateById } from '../domains/user/service';
+import { AppError } from '../libraries/error-handling/AppError';
 
 const getGithubStrategy = () => {
-  // code here
   return new GitHubStrategy(
     {
       clientID: config.GITHUB_CLIENT_ID,
@@ -16,11 +13,10 @@ const getGithubStrategy = () => {
     async (
       accessToken: string,
       refreshToken: string,
-      profile: Profile,
+      profile: any,
       cb: (error: any, user?: any) => void
     ) => {
       try {
-        console.log('GitHub profile:', profile);
         const trimmedPayloadForSession = await getOrCreateUserFromGitHubProfile(
           {
             profile,
@@ -39,12 +35,63 @@ const getOrCreateUserFromGitHubProfile = async ({
   profile,
   accessToken
 }: {
-  profile: Profile;
+  profile: any;
   accessToken: string;
 }) => {
   console.log({ profile, accessToken });
-  // !Todo: If user exists, update the user's access token
-  // !Todo: If user does not exist, create a new user
+  const payload = {
+    name: profile.displayName,
+    email: profile._json.email,
+    profileUrl: profile?._json.avatar_url,
+    authType: 'github',
+    github: {
+      id: profile.id,
+      avatarUrl: profile?._json.avatar_url
+    }
+  };
+
+  // Update query to use github.id instead of githubId
+  let user = await getByGitHubId(profile.id);
+  //Token information
+  if (user) {
+    if (user.isDeactivated) {
+      throw new AppError('user-is-deactivated', 'User is deactivated', 401);
+    }
+    // Note: Using spread to maintain other fields while updating github subdocument
+    user = Object.assign(user, payload, {
+      github: {
+        ...payload.github
+      },
+      updatedAt: new Date()
+    });
+    await updateById(user._id.toString(), user);
+  } else {
+    // Create a new user
+    user = await create({
+      ...payload,
+      github: {
+        ...payload.github
+      }
+    });
+  }
+
+  console.log('created user', user);
+
+  if (!user) {
+    throw new AppError('user-not-found', 'User not found', 404);
+  }
+  const userObj = user.toObject();
+  const trimmedPayloadForSession = {
+    _id: userObj._id,
+    email: userObj.email,
+    authType: userObj.authType,
+    isDeactivated: userObj.isDeactivated,
+    // UI info
+    displayName: userObj.name,
+    avatarUrl: userObj.github?.avatarUrl
+  };
+
+  return trimmedPayloadForSession;
 };
 
 export { getGithubStrategy, getOrCreateUserFromGitHubProfile };

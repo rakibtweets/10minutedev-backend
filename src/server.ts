@@ -19,19 +19,21 @@ const handleAuthCallback = (strategy: string) => {
       passport.authenticate(
         strategy,
         {
-          failureRedirect: `${config.CLIENT_HOST}/login`
+          failureRedirect: `${config.CLIENT_HOST}/sign-in`
         },
         (err: Error, user: Profile) => {
           if (err || !user) {
+            console.log('Failed to authenticate user', err);
             logger.error('Failed to authenticate user', err);
             return res.redirect(
-              `${config.CLIENT_HOST}/login?error=${err?.name}`
+              `${config.CLIENT_HOST}/sign-in?error=${err?.message}`
             );
           }
           req.logIn(user, function (err) {
             if (err) {
+              console.log('Failed to log in', err);
               return res.redirect(
-                `${config.CLIENT_HOST}/login?error=failed-to-authenticate`
+                `${config.CLIENT_HOST}/sign-in?error=failed-to-authenticate`
               );
             }
 
@@ -76,7 +78,12 @@ const createExpressApp = (): Application => {
   expressApp.use(helmet());
   expressApp.use(express.urlencoded({ extended: true }));
   expressApp.use(express.json());
-  expressApp.use(cors());
+  expressApp.use(
+    cors({
+      origin: config.CLIENT_HOST, // Your frontend origin
+      credentials: true
+    })
+  );
 
   // passport js
   passport.use(getGithubStrategy());
@@ -92,6 +99,14 @@ const createExpressApp = (): Application => {
 
   expressApp.use(passport.initialize());
   expressApp.use(passport.session());
+
+  passport.serializeUser(function (user, done) {
+    done(null, user);
+  });
+
+  passport.deserializeUser(function (user: any, done) {
+    done(null, user);
+  });
 
   // Middleware to log an info message for each incoming request
   expressApp.use((req: Request, res: Response, next: NextFunction) => {
