@@ -2,6 +2,7 @@ import config from '../configs';
 import { Strategy as GitHubStrategy, StrategyOptions } from 'passport-github2';
 import { create, getByGitHubId, updateById } from '../domains/user/service';
 import { AppError } from '../libraries/error-handling/AppError';
+import { encryptToken } from './utils';
 
 const getGithubStrategy = () => {
   return new GitHubStrategy(
@@ -49,6 +50,8 @@ const getOrCreateUserFromGitHubProfile = async ({
     }
   };
 
+  const tokenInfo = encryptToken(accessToken);
+
   // Update query to use github.id instead of githubId
   let user = await getByGitHubId(profile.id);
   //Token information
@@ -61,6 +64,7 @@ const getOrCreateUserFromGitHubProfile = async ({
       github: {
         ...payload.github
       },
+      accessToken: tokenInfo.token,
       updatedAt: new Date()
     });
     await updateById(user._id.toString(), user);
@@ -70,7 +74,8 @@ const getOrCreateUserFromGitHubProfile = async ({
       ...payload,
       github: {
         ...payload.github
-      }
+      },
+      accessToken: tokenInfo.token
     });
   }
 

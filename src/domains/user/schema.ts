@@ -7,7 +7,7 @@ export interface IUser extends Document {
   email: string;
   role: 'admin' | 'user';
   authType: 'google' | 'github';
-  enrolledCourses: Array<{
+  enrolledCourses?: Array<{
     courseId: mongoose.Types.ObjectId;
     progress: number;
     completedModules: mongoose.Types.ObjectId[];
@@ -25,6 +25,7 @@ export interface IUser extends Document {
     avatarUrl: string;
   };
   isDeactivated: boolean;
+  accessToken?: string | null;
 }
 
 const userSchema = new Schema<IUser>({
@@ -63,6 +64,9 @@ const userSchema = new Schema<IUser>({
   isDeactivated: {
     type: Boolean,
     default: false
+  },
+  accessToken: {
+    type: String
   }
   // other properties
 });

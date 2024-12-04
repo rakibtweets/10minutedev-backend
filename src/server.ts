@@ -10,6 +10,7 @@ import { connectWithMongoDb } from './libraries/db';
 import cors from 'cors';
 import { clearAuthInfo, getGithubStrategy, getGoogleStrategy } from './auth';
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 
 // Extend Express Request interface
 
@@ -102,12 +103,14 @@ const createExpressApp = (): Application => {
   passport.use(getGithubStrategy());
   passport.use(getGoogleStrategy());
 
+  const sessionStore = MongoStore.create({ mongoUrl: config.MONGODB_URI });
   // Session middleware
   expressApp.use(
     session({
       secret: config.SESSION_SECRET,
       resave: false,
-      saveUninitialized: true
+      saveUninitialized: true,
+      store: sessionStore
     })
   );
 
@@ -179,7 +182,7 @@ const createExpressApp = (): Application => {
         if (userId) await clearAuthInfo(userId);
 
         logger.info('User logged out', { email });
-        res.redirect(`${config.CLIENT_HOST}/login`);
+        res.redirect(`${config.CLIENT_HOST}/sign-in`);
       });
     }
   );

@@ -3,6 +3,7 @@ import { AppError } from '../libraries/error-handling/AppError';
 import { getByGoogleId, create, updateById } from '../domains/user/service';
 import config from '../configs';
 import { Request } from 'express';
+import { encryptToken } from './utils';
 
 interface GoogleProfile {
   id: string;
@@ -82,6 +83,8 @@ export async function getOrCreateUserFromGoogleProfile({
     }
   };
 
+  const tokenInfo = encryptToken(accessToken);
+
   let user = await getByGoogleId(profile.id);
 
   if (user) {
@@ -90,11 +93,12 @@ export async function getOrCreateUserFromGoogleProfile({
     }
 
     user = Object.assign(user, payload, {
+      accessToken: tokenInfo.token,
       updatedAt: new Date()
     });
     await updateById(user._id.toString(), user);
   } else {
-    user = await create(payload);
+    user = await create({ ...payload, accessToken: tokenInfo.token });
   }
 
   if (!user) {

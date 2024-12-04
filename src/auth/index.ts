@@ -8,10 +8,14 @@ import {
   getGoogleStrategy,
   getOrCreateUserFromGoogleProfile
 } from './googleStrategy';
+import { updateById } from '../domains/user/service';
 
 // clear the accessToken value from database after logout
 const clearAuthInfo = async (userId: string) => {
-  return `Clearing auth info for user: ${userId}`;
+  return await updateById(userId, {
+    accessToken: null,
+    updatedAt: new Date()
+  });
 };
 
 // export the functions
