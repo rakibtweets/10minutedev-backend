@@ -4,6 +4,10 @@ import {
   getGithubStrategy,
   getOrCreateUserFromGitHubProfile
 } from './githubStategy';
+import {
+  getGoogleStrategy,
+  getOrCreateUserFromGoogleProfile
+} from './googleStrategy';
 
 // clear the accessToken value from database after logout
 const clearAuthInfo = async (userId: string) => {
@@ -16,5 +20,7 @@ export {
   decryptToken,
   encryptToken,
   getGithubStrategy,
-  getOrCreateUserFromGitHubProfile
+  getOrCreateUserFromGitHubProfile,
+  getGoogleStrategy,
+  getOrCreateUserFromGoogleProfile
 };

@@ -42,7 +42,6 @@ const getOrCreateUserFromGitHubProfile = async ({
   const payload = {
     name: profile.displayName,
     email: profile._json.email,
-    profileUrl: profile?._json.avatar_url,
     authType: 'github',
     github: {
       id: profile.id,
@@ -85,6 +84,7 @@ const getOrCreateUserFromGitHubProfile = async ({
     _id: userObj._id,
     email: userObj.email,
     authType: userObj.authType,
+    isAdmin: userObj.isAdmin,
     isDeactivated: userObj.isDeactivated,
     // UI info
     displayName: userObj.name,

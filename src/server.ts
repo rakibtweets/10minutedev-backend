@@ -1,15 +1,28 @@
 import config from './configs';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
-import passport, { Profile } from 'passport';
+import passport, { Profile as PassportProfile } from 'passport';
 import defineRoutes from './app';
 import { errorHandler } from './libraries/error-handling';
 import logger from './libraries/log/logger';
 import { addRequestIdMiddleware } from './middlewares/request-context';
 import { connectWithMongoDb } from './libraries/db';
 import cors from 'cors';
-import { getGithubStrategy } from './auth';
+import { clearAuthInfo, getGithubStrategy, getGoogleStrategy } from './auth';
 import session from 'express-session';
+
+// Extend Express Request interface
+
+declare module 'express-session' {
+  interface SessionData {
+    userId: string;
+    sessionId: string;
+  }
+}
+
+interface Profile extends PassportProfile {
+  _id: string;
+}
 
 let connection: any;
 
@@ -21,7 +34,7 @@ const handleAuthCallback = (strategy: string) => {
         {
           failureRedirect: `${config.CLIENT_HOST}/sign-in`
         },
-        (err: Error, user: Profile) => {
+        (err: Error, user: PassportProfile) => {
           if (err || !user) {
             console.log('Failed to authenticate user', err);
             logger.error('Failed to authenticate user', err);
@@ -29,23 +42,23 @@ const handleAuthCallback = (strategy: string) => {
               `${config.CLIENT_HOST}/sign-in?error=${err?.message}`
             );
           }
-          req.logIn(user, function (err) {
+          req.logIn(user as any, function (err) {
             if (err) {
               console.log('Failed to log in', err);
               return res.redirect(
                 `${config.CLIENT_HOST}/sign-in?error=failed-to-authenticate`
               );
             }
-
-            // req.session.userId = user._id;
-            // req.session.sessionId = req.sessionID;
-            // req.session.save((err) => {
-            //   if (err) {
-            //     logger.error('Failed to save session', err);
-            //   } else {
-            //     logger.info('Session saved');
-            //   }
-            // });
+            // @ts-ignore
+            req.session.userId = user._id;
+            req.session.sessionId = req.sessionID;
+            req.session.save((err) => {
+              if (err) {
+                logger.error('Failed to save session', err);
+              } else {
+                logger.info('Session saved');
+              }
+            });
 
             next();
           });
@@ -87,6 +100,7 @@ const createExpressApp = (): Application => {
 
   // passport js
   passport.use(getGithubStrategy());
+  passport.use(getGoogleStrategy());
 
   // Session middleware
   expressApp.use(
@@ -120,8 +134,55 @@ const createExpressApp = (): Application => {
   // Github authentication
   expressApp.get('/api/auth/github', passport.authenticate('github'));
 
+  // Add Google auth routes
+  expressApp.get(
+    '/api/auth/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+  );
+
   // Replace the GitHub callback route with:
   expressApp.get('/api/auth/github/callback', ...handleAuthCallback('github'));
+
+  // Replace the Google callback route with:
+  expressApp.get('/api/auth/google/callback', ...handleAuthCallback('google'));
+
+  // Logout route
+  expressApp.get(
+    '/api/logout',
+    async (req: Request, res: Response, next: NextFunction) => {
+      const email = req.user?.email;
+      const userId = req.user?._id;
+
+      req.logout(async function (err) {
+        // Passport.js logout function
+        if (err) {
+          logger.error('Failed to log out user', err);
+          return next(err);
+        }
+
+        req.session.destroy(function (err) {
+          // Handle potential errors during session destruction
+          if (err) {
+            logger.error('Failed to destroy session', err);
+          } else {
+            logger.info('Session destroyed');
+          }
+        });
+
+        res.cookie('userId', '', {
+          expires: new Date(0), // Set expiry date to a time in the past
+          httpOnly: true,
+          secure: true, // Use secure in production (HTTPS)
+          sameSite: 'lax' // Adjust depending on deployment
+        });
+
+        if (userId) await clearAuthInfo(userId);
+
+        logger.info('User logged out', { email });
+        res.redirect(`${config.CLIENT_HOST}/login`);
+      });
+    }
+  );
 
   // Define routes
   defineRoutes(expressApp);

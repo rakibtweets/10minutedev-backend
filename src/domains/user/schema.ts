@@ -5,7 +5,6 @@ import { baseSchema } from '../../libraries/db/base-schema';
 export interface IUser extends Document {
   name: string;
   email: string;
-  profileUrl: string;
   role: 'admin' | 'user';
   authType: 'google' | 'github';
   enrolledCourses: Array<{
@@ -37,7 +36,6 @@ const userSchema = new Schema<IUser>({
     lowercase: true,
     trim: true
   },
-  profileUrl: { type: String },
   role: { type: String, enum: ['admin', 'user'], default: 'user' },
   authType: { type: String, enum: ['google', 'github'], required: true },
   enrolledCourses: [

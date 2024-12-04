@@ -52,6 +52,11 @@ const getByGitHubId = async (githubId: string) => {
   return await Model.findOne({ 'github.id': githubId });
 };
 
+// Add this new function
+const getByGoogleId = async (googleId: string) => {
+  return await Model.findOne({ 'google.id': googleId });
+};
+
 const getById = async (id: string): Promise<any> => {
   try {
     const item = await Model.findById(id);
@@ -85,4 +90,12 @@ const deleteById = async (id: string): Promise<boolean> => {
   }
 };
 
-export { create, search, getById, updateById, deleteById, getByGitHubId };
+export {
+  create,
+  search,
+  getById,
+  updateById,
+  deleteById,
+  getByGitHubId,
+  getByGoogleId
+};
