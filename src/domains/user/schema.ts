@@ -26,6 +26,7 @@ export interface IUser extends Document {
   };
   isDeactivated: boolean;
   accessToken?: string | null;
+  accessTokenIV?: string | null;
 }
 
 const userSchema = new Schema<IUser>({
@@ -66,6 +67,9 @@ const userSchema = new Schema<IUser>({
     default: false
   },
   accessToken: {
+    type: String
+  },
+  accessTokenIV: {
     type: String
   }
   // other properties

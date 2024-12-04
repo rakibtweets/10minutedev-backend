@@ -71,7 +71,7 @@ export async function getOrCreateUserFromGoogleProfile({
   profile: GoogleProfile;
   accessToken: string;
 }): Promise<SessionPayload> {
-  console.log({ profile, accessToken });
+  // console.log({ profile, accessToken });
   const payload: UserPayload = {
     email: profile.emails[0].value,
     name: profile.displayName,
@@ -94,11 +94,16 @@ export async function getOrCreateUserFromGoogleProfile({
 
     user = Object.assign(user, payload, {
       accessToken: tokenInfo.token,
+      accessTokenIV: tokenInfo.iv,
       updatedAt: new Date()
     });
     await updateById(user._id.toString(), user);
   } else {
-    user = await create({ ...payload, accessToken: tokenInfo.token });
+    user = await create({
+      ...payload,
+      accessToken: tokenInfo.token,
+      accessTokenIV: tokenInfo.iv
+    });
   }
 
   if (!user) {

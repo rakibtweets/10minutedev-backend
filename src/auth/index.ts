@@ -14,6 +14,7 @@ import { updateById } from '../domains/user/service';
 const clearAuthInfo = async (userId: string) => {
   return await updateById(userId, {
     accessToken: null,
+    accessTokenIV: null,
     updatedAt: new Date()
   });
 };

@@ -39,7 +39,7 @@ const getOrCreateUserFromGitHubProfile = async ({
   profile: any;
   accessToken: string;
 }) => {
-  console.log({ profile, accessToken });
+  // console.log({ profile, accessToken });
   const payload = {
     name: profile.displayName,
     email: profile._json.email,
@@ -51,6 +51,7 @@ const getOrCreateUserFromGitHubProfile = async ({
   };
 
   const tokenInfo = encryptToken(accessToken);
+  console.log('tokenInfo:', tokenInfo);
 
   // Update query to use github.id instead of githubId
   let user = await getByGitHubId(profile.id);
@@ -65,6 +66,7 @@ const getOrCreateUserFromGitHubProfile = async ({
         ...payload.github
       },
       accessToken: tokenInfo.token,
+      accessTokenIV: tokenInfo.iv,
       updatedAt: new Date()
     });
     await updateById(user._id.toString(), user);
@@ -75,11 +77,10 @@ const getOrCreateUserFromGitHubProfile = async ({
       github: {
         ...payload.github
       },
-      accessToken: tokenInfo.token
+      accessToken: tokenInfo.token,
+      accessTokenIV: tokenInfo.iv
     });
   }
-
-  console.log('created user', user);
 
   if (!user) {
     throw new AppError('user-not-found', 'User not found', 404);
