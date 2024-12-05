@@ -31,6 +31,8 @@ interface SessionPayload {
   isDeactivated?: boolean;
   displayName: string;
   avatarUrl: string;
+  accessToken: string | null | undefined;
+  accessTokenIV: string | null | undefined;
 }
 
 export const getGoogleStrategy = () => {
@@ -117,7 +119,9 @@ export async function getOrCreateUserFromGoogleProfile({
     isAdmin: userObj.isAdmin,
     isDeactivated: userObj.isDeactivated,
     displayName: userObj.name,
-    avatarUrl: userObj.google?.picture as string
+    avatarUrl: userObj.google?.picture as string,
+    accessToken: userObj.accessToken,
+    accessTokenIV: userObj.accessTokenIV
   };
   return trimmedPayloadForSession;
 }

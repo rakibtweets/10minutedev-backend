@@ -25,8 +25,8 @@ export interface IUser extends Document {
     avatarUrl: string;
   };
   isDeactivated: boolean;
-  accessToken?: string | null;
-  accessTokenIV?: string | null;
+  accessToken?: string | null | undefined;
+  accessTokenIV?: string | null | undefined;
 }
 
 const userSchema = new Schema<IUser>({

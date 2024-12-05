@@ -149,6 +149,17 @@ const createExpressApp = (): Application => {
   // Replace the Google callback route with:
   expressApp.get('/api/auth/google/callback', ...handleAuthCallback('google'));
 
+  // get current logged in user data from req.user object
+  expressApp.get('/api/user', (req, res) => {
+    if (!req.user) {
+      return res.status(401).send('Unauthorized');
+    }
+
+    const user = req.user;
+    console.log('expressApp.get  user:', user);
+    res.json(user);
+  });
+
   // Logout route
   expressApp.get(
     '/api/logout',

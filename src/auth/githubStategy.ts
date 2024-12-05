@@ -94,7 +94,9 @@ const getOrCreateUserFromGitHubProfile = async ({
     isDeactivated: userObj.isDeactivated,
     // UI info
     displayName: userObj.name,
-    avatarUrl: userObj.github?.avatarUrl
+    avatarUrl: userObj.github?.avatarUrl,
+    accessToken: userObj.accessToken,
+    accessTokenIV: userObj.accessTokenIV
   };
 
   return trimmedPayloadForSession;
