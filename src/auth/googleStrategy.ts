@@ -16,6 +16,7 @@ interface UserPayload {
   email: string;
   name: string;
   authType: 'google';
+  role: 'admin' | 'user';
   google: {
     id: string;
     email: string;
@@ -79,6 +80,7 @@ export async function getOrCreateUserFromGoogleProfile({
     email: profile.emails[0].value,
     name: profile.displayName,
     authType: 'google',
+    role: isAdmin ? 'admin' : 'user',
     google: {
       id: profile.id,
       email: profile.emails[0].value,

@@ -40,10 +40,12 @@ const getOrCreateUserFromGitHubProfile = async ({
   accessToken: string;
 }) => {
   const isAdmin = config.ADMIN_EMAILS.includes(profile?._json.email);
+
   const payload = {
     name: profile.displayName,
     email: profile._json.email,
     authType: 'github',
+    role: isAdmin ? 'admin' : 'user',
     github: {
       id: profile.id,
       avatarUrl: profile?._json.avatar_url
