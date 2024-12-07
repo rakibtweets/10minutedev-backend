@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-
 import logger from '../libraries/log/logger';
 import schema from './config.schema';
 
@@ -11,13 +10,23 @@ interface ConfigSchema {
 
 class Config {
   private static instance: Config | null = null;
-  public config: ConfigSchema;
+  public config!: ConfigSchema;
 
   private constructor() {
-    logger.info('Loading and validating config for the first time...');
-    this.config = this.loadAndValidateConfig();
-    Config.instance = this;
-    logger.info('Config loaded and validated');
+    if (!Config.instance) {
+      logger.info('Loading and validating config for the first time...');
+      this.config = this.loadAndValidateConfig();
+      Config.instance = this;
+      logger.info('Config loaded and validated', {
+        NODE_ENV: this.config.NODE_ENV,
+        PORT: this.config.PORT,
+        HOST: this.config.HOST,
+        CLIENT_HOST: this.config.CLIENT_HOST
+      });
+      // log the keys only (not the values) from the config
+      logger.info('Config keys: ', Object.keys(this.config));
+    }
+    return Config.instance;
   }
 
   private loadAndValidateConfig(): ConfigSchema {
