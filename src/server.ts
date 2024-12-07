@@ -74,8 +74,12 @@ const handleAuthCallback = (strategy: string) => {
         });
       }
       //@ts-ignore
-      const userId = req?.user?._id.toString();
-      res.cookie('userId', userId, {
+      // const userId = req?.user?._id.toString();
+      const userCookieValue = JSON.stringify({
+        userId: req.user?._id.toString(),
+        isAdmin: req.user?.isAdmin
+      });
+      res.cookie('user', userCookieValue, {
         httpOnly: true,
         secure: true,
         sameSite: 'lax'
@@ -183,7 +187,7 @@ const createExpressApp = (): Application => {
           }
         });
 
-        res.cookie('userId', '', {
+        res.cookie('user', '', {
           expires: new Date(0), // Set expiry date to a time in the past
           httpOnly: true,
           secure: true, // Use secure in production (HTTPS)

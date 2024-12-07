@@ -39,7 +39,7 @@ const getOrCreateUserFromGitHubProfile = async ({
   profile: any;
   accessToken: string;
 }) => {
-  // console.log({ profile, accessToken });
+  const isAdmin = config.ADMIN_EMAILS.includes(profile?._json.email);
   const payload = {
     name: profile.displayName,
     email: profile._json.email,
@@ -47,11 +47,11 @@ const getOrCreateUserFromGitHubProfile = async ({
     github: {
       id: profile.id,
       avatarUrl: profile?._json.avatar_url
-    }
+    },
+    isAdmin
   };
 
   const tokenInfo = encryptToken(accessToken);
-  console.log('tokenInfo:', tokenInfo);
 
   // Update query to use github.id instead of githubId
   let user = await getByGitHubId(profile.id);

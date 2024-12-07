@@ -20,7 +20,8 @@ const schema = Joi.object({
     .required(),
   CLIENT_HOST: Joi.string()
     .pattern(/^(http:\/\/|https:\/\/)/)
-    .required()
+    .required(),
+  ADMIN_EMAILS: Joi.array().items(Joi.string()).required()
 });
 
 export default schema;

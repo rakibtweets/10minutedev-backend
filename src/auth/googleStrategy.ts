@@ -21,6 +21,7 @@ interface UserPayload {
     email: string;
     picture: string;
   };
+  isAdmin?: boolean;
 }
 
 interface SessionPayload {
@@ -73,7 +74,7 @@ export async function getOrCreateUserFromGoogleProfile({
   profile: GoogleProfile;
   accessToken: string;
 }): Promise<SessionPayload> {
-  // console.log({ profile, accessToken });
+  const isAdmin = config.ADMIN_EMAILS.includes(profile.emails[0].value);
   const payload: UserPayload = {
     email: profile.emails[0].value,
     name: profile.displayName,
@@ -82,7 +83,8 @@ export async function getOrCreateUserFromGoogleProfile({
       id: profile.id,
       email: profile.emails[0].value,
       picture: profile.photos[0].value
-    }
+    },
+    isAdmin
   };
 
   const tokenInfo = encryptToken(accessToken);
