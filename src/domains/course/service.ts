@@ -1,6 +1,7 @@
 import logger from '../../libraries/log/logger';
 import Model, { ICourse } from './schema';
 import { AppError } from '../../libraries/error-handling/AppError';
+import { deleteFromCloudinary } from '../../utils/coudinary';
 
 const model: string = 'Course';
 
@@ -72,7 +73,11 @@ const updateById = async (id: string, data: IData): Promise<any> => {
 
 const deleteById = async (id: string): Promise<boolean> => {
   try {
-    await Model.findByIdAndDelete(id);
+    const item = await Model.findByIdAndDelete(id);
+    if (!item) {
+      throw new AppError(`${model} not found`, `${model} not found`, 404);
+    }
+    await deleteFromCloudinary(item.thumbnail.publicId);
     logger.info(`deleteById(): ${model} deleted`, { id });
     return true;
   } catch (error: any) {

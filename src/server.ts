@@ -96,7 +96,7 @@ const createExpressApp = (): Application => {
   expressApp.use(addRequestIdMiddleware);
   expressApp.use(helmet());
   expressApp.use(express.urlencoded({ extended: true }));
-  expressApp.use(express.json());
+  expressApp.use(express.json({ limit: '5mb' }));
   expressApp.use(bodyParser.json());
   expressApp.use(
     cors({

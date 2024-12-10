@@ -24,4 +24,15 @@ export const uploadToCloudinary = async (
   }
 };
 
+// delete image from cloudinary
+export const deleteFromCloudinary = (publicId: string) => {
+  try {
+    const result = cloudinary.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    logger.error('Failed to delete', error);
+    throw new AppError(`Failed to delete image`, String(error));
+  }
+};
+
 export default cloudinary;

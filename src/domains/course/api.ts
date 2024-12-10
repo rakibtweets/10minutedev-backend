@@ -8,7 +8,6 @@ import { createSchema, updateSchema, idSchema } from './request';
 import { validateRequest } from '../../middlewares/request-validate';
 import { logRequest } from '../../middlewares/log';
 import { uploadToCloudinary } from '../../utils/coudinary';
-import upload from '../../middlewares/multer';
 
 const model: string = 'Course';
 
@@ -32,26 +31,22 @@ const routes = (): express.Router => {
 
   router.post(
     '/',
-    upload.single('thumbnail'),
     logRequest({}), // Log only title, instructor, and level
     validateRequest({ schema: createSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
-      console.log('request Body', req.body);
-
-      // const { file } = req.body;
-      console.log('multer file', req.file);
+      const { thumbnail } = req.body;
 
       try {
         //@ts-ignore
         const result = await uploadToCloudinary(
-          req.body.thumbnail.url.path,
+          req.body.thumbnail.url,
           'course'
         );
-        console.log('image result', result);
-        // thumbnail.url = result.secure_url;
-        // thumbnail.publicId = result.public_id;
+        thumbnail.url = result.secure_url;
+        thumbnail.publicId = result.public_id;
 
         const item = await create(req.body);
+        console.log('item', item);
         res.status(201).json(item);
       } catch (error) {
         next(error);

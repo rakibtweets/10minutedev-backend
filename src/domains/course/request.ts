@@ -8,37 +8,7 @@ const createSchema = Joi.object({
   title: Joi.string().min(3).max(100).required(),
   description: Joi.string().min(10).max(1000).required(),
   thumbnail: Joi.object({
-    url: Joi.alternatives()
-      .try(
-        Joi.string().uri().messages({
-          'string.uri': 'Must be a valid URL'
-        }),
-        Joi.object()
-
-          .custom((file) => {
-            // if (!file || !file.size || file.size > MAX_FILE_SIZE) {
-            //   console.log(file);
-            //   return helpers.error('file.size', {
-            //     message: 'File size must be less than 4MB'
-            //   });
-            // }
-
-            // if (!file.type || !ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-            //   return helpers.error('file.type', {
-            //     message: 'Only .jpg, .jpeg, and .png formats are supported'
-            //   });
-            // }
-
-            return file;
-          })
-          .messages({
-            'file.size': 'File size must be less than 4MB',
-            'file.type': 'Only .jpg, .jpeg, and .png formats are supported',
-            'object.base': 'File must be a valid file object'
-          })
-      )
-      .required(),
-
+    url: Joi.string().required(),
     publicId: Joi.string().optional().allow('')
   }),
   instructor: Joi.string().min(3).max(100).required(), // MongoDB ObjectId validation
