@@ -1,13 +1,15 @@
 import express, { Request, Response, NextFunction } from 'express';
 import logger from '../../libraries/log/logger';
 import { AppError } from '../../libraries/error-handling/AppError';
-
 import { create, search, getById, updateById, deleteById } from './service';
-
 import { createSchema, updateSchema, idSchema } from './request';
 import { validateRequest } from '../../middlewares/request-validate';
 import { logRequest } from '../../middlewares/log';
-import { uploadToCloudinary } from '../../utils/coudinary';
+import {
+  deleteFromCloudinary,
+  uploadToCloudinary
+} from '../../utils/coudinary';
+import Model from './schema';
 
 const model: string = 'Course';
 
@@ -46,7 +48,7 @@ const routes = (): express.Router => {
         thumbnail.publicId = result.public_id;
 
         const item = await create(req.body);
-        console.log('item', item);
+
         res.status(201).json(item);
       } catch (error) {
         next(error);
@@ -77,7 +79,32 @@ const routes = (): express.Router => {
     validateRequest({ schema: idSchema, isParam: true }),
     validateRequest({ schema: updateSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
+      const { thumbnail } = req.body;
       try {
+        const course = await Model.findById(req.params.id);
+
+        if (!course) {
+          throw new AppError(`${model} not found`, `${model} not found`, 404);
+        }
+
+        if (thumbnail?.url && thumbnail?.url !== course?.thumbnail.url) {
+          const result = await uploadToCloudinary(thumbnail.url, 'course');
+          thumbnail.url = result.secure_url;
+          thumbnail.publicId = result.public_id;
+          console.log('new thumbnail');
+          // delete the old thumbnail
+          if (course?.thumbnail.public_id) {
+            await deleteFromCloudinary(course.thumbnail.public_id);
+            console.log('old thumbnail deleted');
+          }
+        } else {
+          //@ts-ignore
+          thumbnail.url = course?.thumbnail.url;
+          //@ts-ignore
+          thumbnail.public_id = course?.thumbnail.public_id;
+          console.log('old thumbnail');
+        }
+
         const item = await updateById(req.params.id, req.body);
         if (!item) {
           throw new AppError(`${model} not found`, `${model} not found`, 404);
