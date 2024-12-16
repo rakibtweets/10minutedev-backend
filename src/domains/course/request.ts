@@ -117,6 +117,13 @@ const updateSchema = Joi.object({
   isPublished: Joi.boolean().optional()
 }).min(1);
 
+const publishSchema = Joi.object({
+  isPublished: Joi.boolean().required().messages({
+    'any.required': "'isPublished' field is required.",
+    'boolean.base': "'isPublished' must be a boolean value (true or false)."
+  })
+});
+
 const idSchema = Joi.object().keys({
   id: Joi.string()
     .custom((value, helpers) => {
@@ -128,4 +135,4 @@ const idSchema = Joi.object().keys({
     .required()
 });
 
-export { createSchema, updateSchema, idSchema };
+export { createSchema, updateSchema, idSchema, publishSchema };

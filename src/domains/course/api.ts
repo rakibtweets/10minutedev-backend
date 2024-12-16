@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import logger from '../../libraries/log/logger';
 import { AppError } from '../../libraries/error-handling/AppError';
 import { create, search, getById, updateById, deleteById } from './service';
-import { createSchema, updateSchema, idSchema } from './request';
+import { createSchema, updateSchema, idSchema, publishSchema } from './request';
 import { validateRequest } from '../../middlewares/request-validate';
 import { logRequest } from '../../middlewares/log';
 import {
@@ -79,8 +79,9 @@ const routes = (): express.Router => {
     validateRequest({ schema: idSchema, isParam: true }),
     validateRequest({ schema: updateSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
-      const { thumbnail } = req.body;
+      console.log('req query', req.query);
       try {
+        const { thumbnail } = req.body;
         const course = await Model.findById(req.params.id);
 
         if (!course) {
@@ -110,6 +111,51 @@ const routes = (): express.Router => {
           throw new AppError(`${model} not found`, `${model} not found`, 404);
         }
         res.status(200).json(item);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  router.put(
+    '/:id/publish',
+    logRequest({}),
+    validateRequest({ schema: idSchema, isParam: true }), // Validate :id param
+    validateRequest({ schema: publishSchema }),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { id } = req.params;
+        const { isPublished } = req.body;
+
+        // Validate that 'isPublished' exists and is a valid boolean
+        if (isPublished === undefined) {
+          throw new AppError(
+            "'isPublished' field is required in the request body",
+            'Validation Error',
+            400
+          );
+        }
+
+        const isValidBoolean = typeof isPublished === 'boolean';
+        if (!isValidBoolean) {
+          throw new AppError(
+            "'isPublished' must be a boolean value (true or false)",
+            'Validation Error',
+            400
+          );
+        }
+
+        // Update only the 'isPublished' property in the document
+        const course = await Model.findByIdAndUpdate(
+          id, // Course ID
+          { isPublished },
+          { new: true, runValidators: true } // Return updated document and run validators
+        );
+
+        if (!course) {
+          throw new AppError(`${model} not found`, `${model} not found`, 404);
+        }
+        res.status(200).json(course);
       } catch (error) {
         next(error);
       }
