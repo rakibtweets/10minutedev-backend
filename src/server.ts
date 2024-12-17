@@ -1,6 +1,7 @@
 import config from './configs';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
+import bodyParser from 'body-parser';
 import passport, { Profile as PassportProfile } from 'passport';
 import defineRoutes from './app';
 import { errorHandler } from './libraries/error-handling';
@@ -95,7 +96,8 @@ const createExpressApp = (): Application => {
   expressApp.use(addRequestIdMiddleware);
   expressApp.use(helmet());
   expressApp.use(express.urlencoded({ extended: true }));
-  expressApp.use(express.json());
+  expressApp.use(express.json({ limit: '5mb' }));
+  expressApp.use(bodyParser.json());
   expressApp.use(
     cors({
       origin: config.CLIENT_HOST, // Your frontend origin
