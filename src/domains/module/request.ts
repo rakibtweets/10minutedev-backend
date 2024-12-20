@@ -12,37 +12,42 @@ const createSchema = Joi.object({
       return value;
     }, 'Object Id Validation')
     .required(),
-  videos: Joi.array().items(
-    Joi.string().custom((value, helpers) => {
-      if (!Types.ObjectId.isValid(value)) {
-        return helpers.error('any.invalid');
-      }
-      return value;
-    }, 'Object Id Validation')
-  ),
-  order: Joi.number().required(),
+  videos: Joi.array()
+    .items(
+      Joi.string().custom((value, helpers) => {
+        if (!Types.ObjectId.isValid(value)) {
+          return helpers.error('any.invalid');
+        }
+        return value;
+      }, 'Object Id Validation')
+    )
+    .optional(),
+  order: Joi.number().optional(),
   duration: Joi.number().default(0)
 });
 
 const updateSchema = Joi.object({
   title: Joi.string(),
   description: Joi.string(),
-  course: Joi.string().custom((value, helpers) => {
-    if (!Types.ObjectId.isValid(value)) {
-      return helpers.error('any.invalid');
-    }
-    return value;
-  }, 'Object Id Validation'),
-  videos: Joi.array().items(
-    Joi.string().custom((value, helpers) => {
+  course: Joi.string()
+    .custom((value, helpers) => {
       if (!Types.ObjectId.isValid(value)) {
         return helpers.error('any.invalid');
       }
       return value;
     }, 'Object Id Validation')
-  ),
-  order: Joi.number(),
-  duration: Joi.number()
+    .required(),
+  videos: Joi.array()
+    .items(
+      Joi.string().custom((value, helpers) => {
+        if (!Types.ObjectId.isValid(value)) {
+          return helpers.error('any.invalid');
+        }
+        return value;
+      }, 'Object Id Validation')
+    )
+    .optional(),
+  order: Joi.number().optional()
 }).min(1);
 
 const idSchema = Joi.object().keys({

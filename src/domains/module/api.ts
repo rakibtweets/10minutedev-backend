@@ -20,6 +20,7 @@ const routes = (): express.Router => {
     logRequest({}),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
+        console.log('req.query', req.query);
         const items = await search(req.query);
         res.json(items);
       } catch (error) {

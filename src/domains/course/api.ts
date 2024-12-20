@@ -94,8 +94,8 @@ const routes = (): express.Router => {
           thumbnail.publicId = result.public_id;
           console.log('new thumbnail');
           // delete the old thumbnail
-          if (course?.thumbnail.public_id) {
-            await deleteFromCloudinary(course.thumbnail.public_id);
+          if (course?.thumbnail.publicId) {
+            await deleteFromCloudinary(course?.thumbnail?.publicId);
             console.log('old thumbnail deleted');
           }
         } else {

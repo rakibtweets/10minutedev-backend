@@ -77,7 +77,9 @@ const deleteById = async (id: string): Promise<boolean> => {
     if (!item) {
       throw new AppError(`${model} not found`, `${model} not found`, 404);
     }
-    await deleteFromCloudinary(item.thumbnail.publicId);
+    if (item.thumbnail?.publicId) {
+      await deleteFromCloudinary(item.thumbnail.publicId);
+    }
     logger.info(`deleteById(): ${model} deleted`, { id });
     return true;
   } catch (error: any) {

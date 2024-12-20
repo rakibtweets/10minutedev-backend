@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 import { baseSchema } from '../../libraries/db/base-schema';
 
 export interface ICourse extends Document {
@@ -6,7 +6,7 @@ export interface ICourse extends Document {
   description: string;
   thumbnail: {
     url: string;
-    publicId?: string;
+    publicId?: string | undefined;
   };
   instructor: string;
   modules?: mongoose.Types.ObjectId[];
@@ -41,5 +41,6 @@ const courseSchema = new Schema<ICourse>({
 
 courseSchema.add(baseSchema);
 
-export default mongoose.models.Course ||
-  mongoose.model<ICourse>('Course', courseSchema);
+const Course: Model<ICourse> = mongoose.model<ICourse>('Course', courseSchema);
+
+export default Course;
