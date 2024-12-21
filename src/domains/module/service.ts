@@ -2,6 +2,7 @@ import logger from '../../libraries/log/logger';
 import Model from './schema';
 import { AppError } from '../../libraries/error-handling/AppError';
 import Course, { ICourse } from '../course/schema';
+import Video from '../video/schema';
 
 const model: string = 'Module';
 
@@ -58,7 +59,7 @@ const search = async (query: SearchQuery): Promise<any[]> => {
         { description: { regex: keyword, options: 'i' } }
       ];
     }
-    const items = await Model.find(filter);
+    const items = await Model.find(filter).populate('videos');
     logger.info('search(): filter and count', {
       filter,
       count: items.length
@@ -102,6 +103,7 @@ const deleteById = async (id: string): Promise<boolean> => {
     await Course.findByIdAndUpdate(item.course, {
       $pull: { modules: item._id }
     });
+    await Video.deleteMany({ module: item._id });
     logger.info(`deleteById(): ${model} deleted`, { id });
     return true;
   } catch (error: any) {

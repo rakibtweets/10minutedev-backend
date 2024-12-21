@@ -13,6 +13,14 @@ const createSchema = Joi.object({
       return value;
     })
     .required(),
+  course: Joi.string()
+    .custom((value, helpers) => {
+      if (!mongoose.isValidObjectId(value)) {
+        return helpers.error('any.invalid');
+      }
+      return value;
+    })
+    .required(),
   duration: Joi.number().min(0).required(),
   order: Joi.number().integer().min(0).required(),
   watchedBy: Joi.array()
@@ -32,6 +40,14 @@ const updateSchema = Joi.object({
   description: Joi.string().optional(),
   videoId: Joi.string().optional(),
   module: Joi.string()
+    .custom((value, helpers) => {
+      if (!mongoose.isValidObjectId(value)) {
+        return helpers.error('any.invalid');
+      }
+      return value;
+    })
+    .optional(),
+  course: Joi.string()
     .custom((value, helpers) => {
       if (!mongoose.isValidObjectId(value)) {
         return helpers.error('any.invalid');

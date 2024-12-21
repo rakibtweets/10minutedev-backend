@@ -2,6 +2,7 @@ import logger from '../../libraries/log/logger';
 import Model, { ICourse } from './schema';
 import { AppError } from '../../libraries/error-handling/AppError';
 import { deleteFromCloudinary } from '../../utils/coudinary';
+import Module from '../module/schema';
 
 const model: string = 'Course';
 
@@ -80,6 +81,7 @@ const deleteById = async (id: string): Promise<boolean> => {
     if (item.thumbnail?.publicId) {
       await deleteFromCloudinary(item.thumbnail.publicId);
     }
+    await Module.deleteMany({ course: item._id });
     logger.info(`deleteById(): ${model} deleted`, { id });
     return true;
   } catch (error: any) {
