@@ -2,6 +2,7 @@ import logger from '../../libraries/log/logger';
 import Model from './schema';
 import { AppError } from '../../libraries/error-handling/AppError';
 import Module, { IModule } from '../module/schema';
+import Course from '../course/schema';
 
 const model: string = 'Video';
 
@@ -27,6 +28,11 @@ const create = async (data: IData): Promise<any> => {
     exsistingModule.videos.push(video._id as any);
     exsistingModule.duration += video.duration;
     await exsistingModule.save();
+
+    await Course.findByIdAndUpdate(video.course, {
+      $inc: { noOfVideos: 1, duration: video.duration }
+    });
+
     logger.info(`create(): ${model} created`, {
       id: savedVideo._id
     });
@@ -105,6 +111,9 @@ const updateById = async (id: string, data: IData): Promise<any> => {
     await Module.findByIdAndUpdate(originalItem.module, {
       $inc: { duration: durationDifference }
     });
+    await Course.findByIdAndUpdate(originalItem.course, {
+      $inc: { duration: durationDifference }
+    });
 
     logger.info(`updateById(): model updated`, { id });
     return updatedItem;
@@ -123,6 +132,9 @@ const deleteById = async (id: string): Promise<boolean> => {
     await Module.findByIdAndUpdate(item.module, {
       $pull: { videos: item._id },
       $inc: { duration: -item.duration }
+    });
+    await Course.findByIdAndUpdate(item.course, {
+      $inc: { noOfVideos: -1, duration: -item.duration }
     });
     logger.info(`deleteById(): ${model}  deleted`, { id });
     return true;

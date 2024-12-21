@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 const createSchema = Joi.object({
   title: Joi.string().required(),
-  description: Joi.string().optional(),
+  description: Joi.string().allow('').optional(),
   videoId: Joi.string().required(),
   module: Joi.string()
     .custom((value, helpers) => {
@@ -37,7 +37,7 @@ const createSchema = Joi.object({
 
 const updateSchema = Joi.object({
   title: Joi.string().optional(),
-  description: Joi.string().optional(),
+  description: Joi.string().allow('').optional(),
   videoId: Joi.string().optional(),
   module: Joi.string()
     .custom((value, helpers) => {

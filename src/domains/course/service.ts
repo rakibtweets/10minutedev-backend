@@ -3,6 +3,7 @@ import Model, { ICourse } from './schema';
 import { AppError } from '../../libraries/error-handling/AppError';
 import { deleteFromCloudinary } from '../../utils/coudinary';
 import Module from '../module/schema';
+import Video from '../video/schema';
 
 const model: string = 'Course';
 
@@ -10,7 +11,7 @@ interface IData {
   [key: string]: any;
 }
 
-const create = async (data: ICourse): Promise<any> => {
+const create = async (data: ICourse): Promise<ICourse> => {
   try {
     const item = new Model(data);
     const saved = await item.save();
@@ -26,17 +27,21 @@ const create = async (data: ICourse): Promise<any> => {
 
 interface SearchQuery {
   keyword?: string;
+  tag?: string;
 }
 
-const search = async (query: SearchQuery): Promise<any[]> => {
+const search = async (query: SearchQuery): Promise<ICourse[]> => {
   try {
-    const { keyword } = query ?? {};
+    const { keyword, tag } = query ?? {};
     const filter: any = {};
     if (keyword) {
       filter.or = [
         { name: { regex: keyword, options: 'i' } },
         { description: { regex: keyword, options: 'i' } }
       ];
+    }
+    if (tag) {
+      filter.tags = tag; // Matches documents where the 'tags' array contains the specified tag
     }
     const items = await Model.find(filter);
     logger.info('search(): filter and count', {
@@ -82,6 +87,7 @@ const deleteById = async (id: string): Promise<boolean> => {
       await deleteFromCloudinary(item.thumbnail.publicId);
     }
     await Module.deleteMany({ course: item._id });
+    await Video.deleteMany({ course: item._id });
     logger.info(`deleteById(): ${model} deleted`, { id });
     return true;
   } catch (error: any) {

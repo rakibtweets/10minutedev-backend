@@ -16,6 +16,7 @@ export interface ICourse extends Document {
   price?: number;
   level: 'beginner' | 'intermediate' | 'advanced';
   isPublished?: boolean;
+  noOfVideos?: number;
 }
 
 const courseSchema = new Schema<ICourse>({
@@ -36,7 +37,8 @@ const courseSchema = new Schema<ICourse>({
     enum: ['beginner', 'intermediate', 'advanced'],
     required: true
   },
-  isPublished: { type: Boolean, default: false }
+  isPublished: { type: Boolean, default: false },
+  noOfVideos: { type: Number, default: 0 }
 });
 
 courseSchema.add(baseSchema);
