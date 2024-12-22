@@ -59,7 +59,10 @@ const search = async (query: SearchQuery): Promise<any[]> => {
         { description: { regex: keyword, options: 'i' } }
       ];
     }
-    const items = await Model.find(filter).populate('videos');
+    const items = await Model.find(filter).populate({
+      path: 'videos',
+      select: '_id title duration'
+    });
     logger.info('search(): filter and count', {
       filter,
       count: items.length

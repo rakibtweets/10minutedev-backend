@@ -28,17 +28,21 @@ const create = async (data: ICourse): Promise<ICourse> => {
 interface SearchQuery {
   keyword?: string;
   tag?: string;
+  isPublished?: string;
 }
 
 const search = async (query: SearchQuery): Promise<ICourse[]> => {
   try {
-    const { keyword, tag } = query ?? {};
+    const { keyword, tag, isPublished } = query ?? {};
     const filter: any = {};
     if (keyword) {
       filter.or = [
         { name: { regex: keyword, options: 'i' } },
         { description: { regex: keyword, options: 'i' } }
       ];
+    }
+    if (isPublished) {
+      filter.isPublished = isPublished === 'true' ? true : false;
     }
     if (tag) {
       filter.tags = tag; // Matches documents where the 'tags' array contains the specified tag
