@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import bodyParser from 'body-parser';
 import passport, { Profile as PassportProfile } from 'passport';
 import defineRoutes from './app';
-import { errorHandler } from './libraries/error-handling';
 import logger from './libraries/log/logger';
 import { addRequestIdMiddleware } from './middlewares/request-context';
 import { connectWithMongoDb } from './libraries/db';
@@ -12,6 +11,7 @@ import cors from 'cors';
 import { clearAuthInfo, getGithubStrategy, getGoogleStrategy } from './auth';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
+import { errorHandler } from './libraries/error-handling';
 
 // Extend Express Request interface
 
@@ -264,18 +264,44 @@ const openConnection = async (
 };
 
 const defineErrorHandlingMiddleware = (expressApp: Application): void => {
-  expressApp.use(async (error: any, req: Request, res: Response) => {
-    // Ensure next is included for Express error handlers
-    if (error && typeof error === 'object') {
-      if (error.isTrusted === undefined || error.isTrusted === null) {
-        error.isTrusted = true;
-      }
-    }
+  console.log('inside defineErrorHandlingMiddleware');
+  expressApp.use(
+    async (
+      error: any,
+      req: Request,
+      res: Response,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      next: NextFunction
+    ) => {
+      // Ensure next is included for Express error handlers
+      console.log('Inside error middleware', { error });
 
-    // Handle error and send response
-    errorHandler.handleError(error);
-    res.status(error?.HTTPStatus || 500).end();
-  });
+      if (error && typeof error === 'object') {
+        if (error && error.isTrusted === undefined) {
+          error.isTrusted = true;
+        }
+      }
+
+      // Handle error and send response
+      const appError = errorHandler.handleError(error);
+      console.log('defineErrorHandlingMiddleware  appError:', appError);
+
+      logger.info('Error occurred:', appError);
+
+      // @ts-ignore
+      const response = { ...appError, errorMessage: appError.message };
+      console.log('error response', response);
+      res
+        .status(error?.HTTPStatus || 500)
+        .json(
+          // @ts-ignore
+          response || {
+            message: 'Internal server error'
+          }
+        )
+        .end();
+    }
+  );
 };
 
 export { createExpressApp, startWebServer, stopWebServer };

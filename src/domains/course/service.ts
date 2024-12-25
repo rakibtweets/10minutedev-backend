@@ -4,6 +4,9 @@ import { AppError } from '../../libraries/error-handling/AppError';
 import { deleteFromCloudinary } from '../../utils/coudinary';
 import Module from '../module/schema';
 import Video from '../video/schema';
+import Course from './schema';
+import User from '../user/schema';
+import mongoose from 'mongoose';
 
 const model: string = 'Course';
 
@@ -99,5 +102,71 @@ const deleteById = async (id: string): Promise<boolean> => {
     throw new AppError(`Failed to delete ${model}`, error.message);
   }
 };
+const enrollCourseService = async (
+  courseId: string,
+  userId: string,
+  userEmail: string | undefined,
+  bodyEmail: string
+): Promise<any> => {
+  try {
+    if (!userId) {
+      throw new AppError('Authentication error', 'User not logged in', 401);
+    }
+    //  Validate email
+    if (bodyEmail !== userEmail) {
+      throw new AppError(
+        'Varification Error',
+        'Email does not match the authenticated user',
+        403
+      );
+    }
 
-export { create, search, getById, updateById, deleteById };
+    //  Find the course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      throw new AppError('NotFoundError', 'Course not found', 404);
+    }
+
+    //  Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError('NotFoundError', 'User not found', 404);
+    }
+
+    //  Check if the user is already enrolled
+    if (
+      user.enrolledCourses?.some(
+        (enrolledCourse: any) => enrolledCourse.courseId.toString() === courseId
+      )
+    ) {
+      throw new AppError(
+        'BadRequestError',
+        'User already enrolled in this course',
+        400
+      );
+    }
+
+    //Enroll the user
+    user.enrolledCourses = user.enrolledCourses || [];
+    user.enrolledCourses.push({
+      courseId: course._id as mongoose.Types.ObjectId,
+      progress: 0,
+      completedModules: [],
+      watchedVideos: [],
+      enrolledAt: new Date()
+    });
+    await user.save();
+
+    //  Update the course's enrolled students count
+    course.enrolledStudents += 1;
+    await course.save();
+
+    return course;
+  } catch (error: any) {
+    // Log the error for debugging purposes
+    logger.error(`enrollCourseService(): Failed to enroll ${model}`, error);
+    // throw new AppError(`Failed to enroll ${model}`, error.message);
+    throw error;
+  }
+};
+export { create, search, getById, updateById, deleteById, enrollCourseService };

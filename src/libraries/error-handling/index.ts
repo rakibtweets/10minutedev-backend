@@ -30,14 +30,16 @@ const errorHandler = {
     });
   },
 
-  handleError: async (errorToHandle: unknown): Promise<void> => {
+  handleError: async (errorToHandle: unknown): Promise<any> => {
     try {
       const appError: AppError = normalizeError(errorToHandle);
+      console.log('handleError:  appError:', { appError });
       logger.error(appError.message, appError);
 
       if (!appError.isTrusted) {
         await terminateHttpServerAndExit();
       }
+      return appError;
     } catch (handlingError) {
       // No logger here since it might have failed
       process.stdout.write(
@@ -50,6 +52,7 @@ const errorHandler = {
 };
 
 const terminateHttpServerAndExit = async (): Promise<void> => {
+  // @ts-ignore
   if (httpServerRef) {
     await new Promise<void>((resolve) => httpServerRef.close(() => resolve())); // Graceful shutdown
   }
@@ -58,11 +61,13 @@ const terminateHttpServerAndExit = async (): Promise<void> => {
 
 const normalizeError = (errorToHandle: unknown): AppError => {
   if (errorToHandle instanceof AppError) {
+    console.log('normalizeError  errorToHandle:', { errorToHandle });
     return errorToHandle;
   }
   if (errorToHandle instanceof Error) {
     const appError = new AppError(errorToHandle.name, errorToHandle.message);
     appError.stack = errorToHandle.stack;
+    console.log('normalizeError  appError:', { appError });
     return appError;
   }
 
