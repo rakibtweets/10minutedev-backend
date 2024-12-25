@@ -2,6 +2,7 @@ import logger from '../log/logger';
 import { inspect } from 'util';
 import { AppError } from './AppError';
 import { Server } from 'http';
+import mongoose from 'mongoose';
 
 let httpServerRef: Server | null;
 
@@ -79,5 +80,34 @@ const normalizeError = (errorToHandle: unknown): AppError => {
     )}`
   );
 };
+const errorHandlerMiddleware = (errorHandler: any) => {
+  let error = errorHandler;
 
-export { errorHandler };
+  // Check if the error is an instance of an ApiError class which extends native Error class
+  if (!(error instanceof AppError)) {
+    // if not
+    // create a new ApiError instance to keep the consistency
+
+    // assign an appropriate status code
+    const HTTPStatus =
+      error.HTTPStatus || error instanceof mongoose.Error ? 400 : 500;
+
+    // set a message from native Error instance or a custom one
+    const message = error.message || 'Internal server error';
+    error = new AppError(error.name, message, HTTPStatus);
+  }
+
+  // Now we are sure that the `error` variable will be an instance of ApiError class
+  const response = {
+    ...error,
+    message: error.message,
+    ...(process.env.NODE_ENV === 'development' ? { stack: error.stack } : {}) // Error stack traces should be visible in development for debugging
+  };
+
+  logger.error(response.message, response);
+
+  // Send error response
+  return response;
+};
+
+export { errorHandler, errorHandlerMiddleware };

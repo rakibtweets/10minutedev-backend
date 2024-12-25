@@ -64,6 +64,11 @@ const search = async (query: SearchQuery): Promise<any[]> => {
       ];
     }
     const items = await Model.find(filter);
+
+    if (!items) {
+      throw new AppError('Not found', `Failed to search ${model} `, 404);
+    }
+
     logger.info('search(): filter and count', {
       filter,
       count: items.length
@@ -71,18 +76,21 @@ const search = async (query: SearchQuery): Promise<any[]> => {
     return items;
   } catch (error: any) {
     logger.error(`search(): Failed to search ${model} `, error);
-    throw new AppError(`Failed to search ${model} `, error.message, 400);
+    throw error;
   }
 };
 
 const getById = async (id: string): Promise<any> => {
   try {
     const item = await Model.findById(id);
+    if (!item) {
+      throw new AppError('Not found', `Failed to get ${model} `, 404);
+    }
     logger.info(`getById(): model fetched`, { id });
     return item;
   } catch (error: any) {
     logger.error(`getById(): Failed to get ${model} `, error);
-    throw new AppError(`Failed to get ${model} `, error.message);
+    throw error;
   }
 };
 
@@ -119,7 +127,7 @@ const updateById = async (id: string, data: IData): Promise<any> => {
     return updatedItem;
   } catch (error: any) {
     logger.error(`updateById(): Failed to update ${model} `, error);
-    throw new AppError(`Failed to update ${model} `, error.message);
+    throw error;
   }
 };
 
@@ -140,7 +148,7 @@ const deleteById = async (id: string): Promise<boolean> => {
     return true;
   } catch (error: any) {
     logger.error(`deleteById(): Failed to delete ${model} `, error);
-    throw new AppError(`Failed to delete ${model} `, error.message);
+    throw error;
   }
 };
 

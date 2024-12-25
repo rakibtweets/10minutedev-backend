@@ -60,11 +60,14 @@ const getByGoogleId = async (googleId: string) => {
 const getById = async (id: string): Promise<any> => {
   try {
     const item = await Model.findById(id);
+    if (!item) {
+      throw new AppError('Not found', `Failed to get ${model}`, 404);
+    }
     logger.info(`getById(): model fetched`, { id });
     return item;
   } catch (error: any) {
     logger.error(`getById(): Failed to get ${model}`, error);
-    throw new AppError(`Failed to get ${model}`, error.message);
+    throw error;
   }
 };
 
@@ -72,21 +75,28 @@ const updateById = async (id: string, data: IData): Promise<any> => {
   try {
     const item = await Model.findByIdAndUpdate(id, data, { new: true });
     logger.info(`updateById(): model updated`, { id });
+    if (!item) {
+      throw new AppError('Not found', `Failed to update ${model}`, 404);
+    }
     return item;
   } catch (error: any) {
     logger.error(`updateById(): Failed to update ${model}`, error);
-    throw new AppError(`Failed to update ${model}`, error.message);
+    throw error;
   }
 };
 
 const deleteById = async (id: string): Promise<boolean> => {
   try {
     await Model.findByIdAndDelete(id);
+    if (!id) {
+      throw new AppError('Not found', `Failed to delete ${model}`, 404);
+    }
     logger.info(`deleteById(): ${model} deleted`, { id });
+
     return true;
   } catch (error: any) {
     logger.error(`deleteById(): Failed to delete ${model}`, error);
-    throw new AppError(`Failed to delete ${model}`, error.message);
+    throw error;
   }
 };
 

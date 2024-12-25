@@ -58,7 +58,7 @@ const search = async (query: SearchQuery): Promise<ICourse[]> => {
     return items;
   } catch (error: any) {
     logger.error(`search(): Failed to search ${model}`, error);
-    throw new AppError(`Failed to search ${model}`, error.message, 400);
+    throw error;
   }
 };
 
@@ -69,7 +69,7 @@ const getById = async (id: string): Promise<any> => {
     return item;
   } catch (error: any) {
     logger.error(`getById(): Failed to get ${model}`, error);
-    throw new AppError(`Failed to get ${model}`, error.message);
+    throw error;
   }
 };
 
@@ -80,7 +80,7 @@ const updateById = async (id: string, data: IData): Promise<any> => {
     return item;
   } catch (error: any) {
     logger.error(`updateById(): Failed to update ${model}`, error);
-    throw new AppError(`Failed to update ${model}`, error.message);
+    throw error;
   }
 };
 
@@ -99,7 +99,7 @@ const deleteById = async (id: string): Promise<boolean> => {
     return true;
   } catch (error: any) {
     logger.error(`deleteById(): Failed to delete ${model}`, error);
-    throw new AppError(`Failed to delete ${model}`, error.message);
+    throw error;
   }
 };
 const enrollCourseService = async (
@@ -165,7 +165,7 @@ const enrollCourseService = async (
   } catch (error: any) {
     // Log the error for debugging purposes
     logger.error(`enrollCourseService(): Failed to enroll ${model}`, error);
-    // throw new AppError(`Failed to enroll ${model}`, error.message);
+
     throw error;
   }
 };

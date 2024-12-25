@@ -11,7 +11,10 @@ import cors from 'cors';
 import { clearAuthInfo, getGithubStrategy, getGoogleStrategy } from './auth';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
-import { errorHandler } from './libraries/error-handling';
+import {
+  errorHandler,
+  errorHandlerMiddleware
+} from './libraries/error-handling';
 
 // Extend Express Request interface
 
@@ -281,23 +284,21 @@ const defineErrorHandlingMiddleware = (expressApp: Application): void => {
           error.isTrusted = true;
         }
       }
-
+      const resErr = errorHandlerMiddleware(error);
       // Handle error and send response
-      const appError = errorHandler.handleError(error);
-      console.log('defineErrorHandlingMiddleware  appError:', appError);
+      // const appError = errorHandler.handleError(error);
+      // console.log('defineErrorHandlingMiddleware  appError:', appError);
 
-      logger.info('Error occurred:', appError);
+      // logger.info('Error occurred:', appError);
 
-      // @ts-ignore
-      const response = { ...appError, errorMessage: appError.message };
-      console.log('error response', response);
+      // // @ts-ignore
+      // const response = { ...appError, errorMessage: appError.message };
+      // console.log('error response', response);
       res
-        .status(error?.HTTPStatus || 500)
+        .status(resErr?.HTTPStatus || 500)
         .json(
           // @ts-ignore
-          response || {
-            message: 'Internal server error'
-          }
+          resErr
         )
         .end();
     }
