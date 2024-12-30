@@ -170,7 +170,7 @@ const markVideoAsWatched = async (userId: string, videoId: string) => {
     }
 
     // Update user's watched videos
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       userId,
       {
         $addToSet: { 'enrolledCourses.$[course].watchedVideos': video._id }
@@ -180,17 +180,20 @@ const markVideoAsWatched = async (userId: string, videoId: string) => {
       }
     );
 
+    if (!user) {
+      throw new AppError('User not found', 'User not found', 404);
+    }
+
     // Check if module is completed
     const module = await Module.findById(video.module);
     if (!module) {
       throw new AppError('Module not found', 'Module not found', 404);
     }
     const allVideosInModule = await Video.find({ module: video.module });
+    const enrolledCourse = user?.enrolledCourses?.find(
+      (c) => c.courseId.toString() === video.course.toString()
+    );
 
-    const user = await User.findById(userId);
-    if (!user) {
-      throw new AppError('User not found', 'User not found', 404);
-    }
     const courseEnrollment = user?.enrolledCourses?.find(
       (c) => c.courseId.toString() === video.course.toString()
     );
@@ -212,6 +215,22 @@ const markVideoAsWatched = async (userId: string, videoId: string) => {
         }
       );
     }
+
+    // Update course progress
+    const totalVideos = await Video.countDocuments({ course: video.course });
+    const watchedVideosCount = enrolledCourse?.watchedVideos.length || 0;
+
+    const progress = (watchedVideosCount / totalVideos) * 100;
+
+    await User.findOneAndUpdate(
+      {
+        _id: userId,
+        'enrolledCourses.courseId': video.course
+      },
+      {
+        $set: { 'enrolledCourses.$.progress': progress }
+      }
+    );
 
     return updatedItem;
   } catch (error) {
