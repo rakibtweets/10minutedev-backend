@@ -99,6 +99,139 @@ const deleteById = async (id: string): Promise<boolean> => {
     throw error;
   }
 };
+const getEnrolledCoursesService = async (
+  userId: string | undefined
+): Promise<any> => {
+  if (!userId) {
+    throw new AppError('Authentication Error', 'User not logged in', 401);
+  }
+
+  try {
+    // Find the user by ID and populate enrolled courses
+    const user = await Model.findById(userId)
+      .populate({
+        path: 'enrolledCourses.courseId',
+        select: 'title' // Fetch the title field from the Course model
+      })
+      .lean();
+
+    if (!user) {
+      throw new AppError('NotFoundError', 'User not found', 404);
+    }
+
+    // Check if the user has enrolled courses
+    if (!user.enrolledCourses || user.enrolledCourses.length === 0) {
+      throw new AppError(
+        'NoEnrolledCourses',
+        'The user has no enrolled courses',
+        404
+      );
+    }
+
+    // Map the enrolledCourses to the desired format
+    const courses = user.enrolledCourses
+      .map((course: any) => {
+        if (!course.courseId) return null; // Skip if courseId is not populated
+
+        return {
+          courseId: course.courseId._id, // Assuming 'courseId' is the MongoDB ObjectId
+          title: course.courseId.title,
+          enrolledAt: course.enrolledAt.toISOString() // Convert Date to ISO string
+        };
+      })
+      .filter(Boolean); // Remove any null entries
+
+    return courses;
+  } catch (error: any) {
+    logger.error(
+      `getEnrolledCoursesService(): Failed to fetch enrolled courses`,
+      error
+    );
+    throw error;
+  }
+};
+
+const getUserStatisticsAndCourses = async (
+  userId: string | undefined
+): Promise<{
+  statistics: {
+    totalEnrolledCourses: number;
+    averageCourseProgress: number;
+  };
+  courses: {
+    _id: string;
+    title: string;
+    progress: number;
+    totalLessons: number;
+    completedLessons: number;
+  }[];
+}> => {
+  if (!userId) {
+    throw new AppError('AuthenticationError', 'User not logged in', 401);
+  }
+
+  try {
+    // Fetch the user with populated enrolled courses
+    const user = await Model.findById(userId)
+      .populate({
+        path: 'enrolledCourses.courseId',
+        select: 'title modules'
+      })
+      .lean();
+
+    if (!user) {
+      throw new AppError('NotFoundError', 'User not found', 404);
+    }
+
+    // Check if user has enrolled courses
+    if (!user.enrolledCourses || user.enrolledCourses.length === 0) {
+      return {
+        statistics: {
+          totalEnrolledCourses: 0,
+          averageCourseProgress: 0
+        },
+        courses: []
+      };
+    }
+
+    // Process enrolled courses data
+    const courses = user?.enrolledCourses?.map((course: any) => {
+      const totalLessons = course.courseId.modules?.length || 0;
+      const completedLessons = course.completedModules?.length || 0;
+
+      return {
+        _id: course.courseId._id,
+        title: course.courseId.title,
+        progress: course.progress,
+        totalLessons,
+        completedLessons
+      };
+    });
+
+    // Calculate statistics
+    const totalEnrolledCourses = courses.length;
+    const totalProgress = courses.reduce(
+      (sum, course) => sum + course.progress,
+      0
+    );
+    const averageCourseProgress =
+      totalEnrolledCourses > 0 ? totalProgress / totalEnrolledCourses : 0;
+
+    return {
+      statistics: {
+        totalEnrolledCourses,
+        averageCourseProgress
+      },
+      courses
+    };
+  } catch (error: any) {
+    logger.error(
+      `getUserStatisticsAndCourses(): Failed to fetch data for user ${userId}`,
+      error
+    );
+    throw error;
+  }
+};
 
 export {
   create,
@@ -107,5 +240,7 @@ export {
   updateById,
   deleteById,
   getByGitHubId,
-  getByGoogleId
+  getByGoogleId,
+  getEnrolledCoursesService,
+  getUserStatisticsAndCourses
 };

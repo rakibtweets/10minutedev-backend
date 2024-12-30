@@ -169,4 +169,5 @@ const enrollCourseService = async (
     throw error;
   }
 };
+
 export { create, search, getById, updateById, deleteById, enrollCourseService };

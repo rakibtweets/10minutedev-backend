@@ -267,7 +267,6 @@ const openConnection = async (
 };
 
 const defineErrorHandlingMiddleware = (expressApp: Application): void => {
-  console.log('inside defineErrorHandlingMiddleware');
   expressApp.use(
     async (
       error: any,
@@ -277,7 +276,6 @@ const defineErrorHandlingMiddleware = (expressApp: Application): void => {
       next: NextFunction
     ) => {
       // Ensure next is included for Express error handlers
-      console.log('Inside error middleware', { error });
 
       if (error && typeof error === 'object') {
         if (error && error.isTrusted === undefined) {

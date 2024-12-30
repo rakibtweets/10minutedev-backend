@@ -80,6 +80,7 @@ const normalizeError = (errorToHandle: unknown): AppError => {
     )}`
   );
 };
+
 const errorHandlerMiddleware = (errorHandler: any) => {
   let error = errorHandler;
 

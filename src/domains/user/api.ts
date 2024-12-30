@@ -1,10 +1,19 @@
 import express, { Request, Response, NextFunction } from 'express';
 import logger from '../../libraries/log/logger';
 import { AppError } from '../../libraries/error-handling/AppError';
-import { create, search, getById, updateById, deleteById } from './service';
+import {
+  create,
+  search,
+  getById,
+  updateById,
+  deleteById,
+  getEnrolledCoursesService,
+  getUserStatisticsAndCourses
+} from './service';
 import { createSchema, updateSchema, idSchema } from './request';
 import { validateRequest } from '../../middlewares/request-validate';
 import { logRequest } from '../../middlewares/log';
+import { isAuthenticated } from '../../middlewares/auth/authentication';
 
 const model: string = 'User';
 
@@ -20,6 +29,37 @@ const routes = (): express.Router => {
       try {
         const items = await search(req.query);
         res.json(items);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // create loggin in user enrolled courses
+  router.get(
+    '/enrolled-courses',
+    logRequest({}),
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      const userId = req.user?._id || '';
+      try {
+        const enrolledCourses = await getEnrolledCoursesService(userId);
+        res.status(200).json(enrolledCourses);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  router.get(
+    '/dashboard',
+    logRequest({}),
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      const userId = req.user?._id || '';
+      try {
+        const enrolledCourses = await getUserStatisticsAndCourses(userId);
+        res.status(200).json(enrolledCourses);
       } catch (error) {
         next(error);
       }
@@ -82,7 +122,7 @@ const routes = (): express.Router => {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         await deleteById(req.params.id);
-        res.status(204).json({ message: `model is deleted` });
+        res.status(204).json({ message: `${model} is deleted` });
       } catch (error) {
         next(error);
       }

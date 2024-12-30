@@ -42,11 +42,12 @@ const create = async (data: IData): Promise<any> => {
 interface SearchQuery {
   keyword?: string;
   courseId?: string;
+  videoId?: string;
 }
 
 const search = async (query: SearchQuery): Promise<any[]> => {
   try {
-    const { keyword, courseId } = query ?? {};
+    const { keyword, courseId, videoId } = query ?? {};
     const filter: any = {};
 
     if (courseId) {
@@ -61,7 +62,7 @@ const search = async (query: SearchQuery): Promise<any[]> => {
     }
     const items = await Model.find(filter).populate({
       path: 'videos',
-      select: '_id title duration'
+      select: `_id title duration ${videoId === 'true' ? 'videoId watchedBy' : ''}`
     });
     logger.info('search(): filter and count', {
       filter,

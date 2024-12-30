@@ -3,6 +3,8 @@ import Model from './schema';
 import { AppError } from '../../libraries/error-handling/AppError';
 import Module, { IModule } from '../module/schema';
 import Course from '../course/schema';
+import User from '../user/schema';
+import Video from './schema';
 
 const model: string = 'Video';
 
@@ -152,4 +154,70 @@ const deleteById = async (id: string): Promise<boolean> => {
   }
 };
 
-export { create, search, getById, updateById, deleteById };
+const markVideoAsWatched = async (userId: string, videoId: string) => {
+  try {
+    // Mark video as watched
+    const updatedItem = await Model.findOneAndUpdate(
+      { videoId },
+      {
+        $addToSet: { watchedBy: userId }
+      }
+    );
+
+    const video = await Video.findById(updatedItem?._id);
+    if (!video) {
+      throw new AppError('Video not found', 'Video not found', 404);
+    }
+
+    // Update user's watched videos
+    await User.findByIdAndUpdate(
+      userId,
+      {
+        $addToSet: { 'enrolledCourses.$[course].watchedVideos': video._id }
+      },
+      {
+        arrayFilters: [{ 'course.courseId': video.course }]
+      }
+    );
+
+    // Check if module is completed
+    const module = await Module.findById(video.module);
+    if (!module) {
+      throw new AppError('Module not found', 'Module not found', 404);
+    }
+    const allVideosInModule = await Video.find({ module: video.module });
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 'User not found', 404);
+    }
+    const courseEnrollment = user?.enrolledCourses?.find(
+      (c) => c.courseId.toString() === video.course.toString()
+    );
+
+    const allVideosWatched = allVideosInModule.every((v) =>
+      courseEnrollment?.watchedVideos.includes(v._id)
+    );
+
+    if (allVideosWatched) {
+      await User.findByIdAndUpdate(
+        userId,
+        {
+          $addToSet: {
+            'enrolledCourses.$[course].completedModules': module._id
+          }
+        },
+        {
+          arrayFilters: [{ 'course.courseId': video.course }]
+        }
+      );
+    }
+
+    return updatedItem;
+  } catch (error) {
+    logger.error(`markVideoAsWatched(): Failed to delete ${model} `, error);
+    throw error;
+  }
+};
+
+export { create, search, getById, updateById, deleteById, markVideoAsWatched };

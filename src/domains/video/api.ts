@@ -2,11 +2,19 @@ import express, { Request, Response, NextFunction } from 'express';
 import logger from '../../libraries/log/logger';
 import { AppError } from '../../libraries/error-handling/AppError';
 
-import { create, search, getById, updateById, deleteById } from './service';
+import {
+  create,
+  search,
+  getById,
+  updateById,
+  deleteById,
+  markVideoAsWatched
+} from './service';
 
 import { createSchema, updateSchema, idSchema } from './request';
 import { validateRequest } from '../../middlewares/request-validate';
 import { logRequest } from '../../middlewares/log';
+import { isAuthenticated } from '../../middlewares/auth/authentication';
 
 const model: string = 'Video';
 
@@ -67,6 +75,26 @@ const routes = (): express.Router => {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const item = await updateById(req.params.id, req.body);
+        if (!item) {
+          throw new AppError(`${model} not found`, `${model} not found`, 404);
+        }
+        res.status(200).json(item);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  router.put(
+    '/:id/watched',
+    logRequest({}),
+    isAuthenticated,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const userId = req.user?._id || '';
+        const videoId = req.params.id;
+        const item = await markVideoAsWatched(userId, videoId);
+        console.log('watched', item);
+
         if (!item) {
           throw new AppError(`${model} not found`, `${model} not found`, 404);
         }
