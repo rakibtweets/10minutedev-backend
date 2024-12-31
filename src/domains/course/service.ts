@@ -32,11 +32,12 @@ interface SearchQuery {
   keyword?: string;
   tag?: string;
   isPublished?: string;
+  limit?: number;
 }
 
 const search = async (query: SearchQuery): Promise<ICourse[]> => {
   try {
-    const { keyword, tag, isPublished } = query ?? {};
+    const { keyword, tag, isPublished, limit } = query ?? {};
     const filter: any = {};
     if (keyword) {
       filter.or = [
@@ -44,13 +45,18 @@ const search = async (query: SearchQuery): Promise<ICourse[]> => {
         { description: { regex: keyword, options: 'i' } }
       ];
     }
+
     if (isPublished) {
       filter.isPublished = isPublished === 'true' ? true : false;
     }
     if (tag) {
       filter.tags = tag; // Matches documents where the 'tags' array contains the specified tag
     }
-    const items = await Model.find(filter);
+    let queryBuilder = Model.find(filter);
+    if (limit) {
+      queryBuilder = queryBuilder.limit(Number(limit));
+    }
+    const items = await queryBuilder;
     logger.info('search(): filter and count', {
       filter,
       count: items.length
