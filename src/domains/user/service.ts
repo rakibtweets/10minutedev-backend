@@ -1,6 +1,10 @@
 import logger from '../../libraries/log/logger';
 import Model from './schema';
 import { AppError } from '../../libraries/error-handling/AppError';
+import User from './schema';
+import Course from '../course/schema';
+import Video from '../video/schema';
+import Module from '../module/schema';
 
 const model: string = 'User';
 
@@ -233,6 +237,89 @@ const getUserStatisticsAndCourses = async (
   }
 };
 
+// get all the stats
+const getAdminDashboardStats = async () => {
+  const totalUsers = await User.countDocuments();
+  const activeUsers = await User.countDocuments({ isDeactivated: false });
+  const totalAdmins = await User.countDocuments({ isAdmin: true });
+  const totalCourses = await Course.countDocuments();
+  const publishedCourses = await Course.countDocuments({ isPublished: true });
+  const totalEnrolledStudents = await Course.aggregate([
+    { $group: { _id: null, total: { $sum: '$enrolledStudents' } } }
+  ]);
+  const totalVideos = await Video.countDocuments();
+  const watchedVideos = await Video.countDocuments({
+    watchedBy: { $exists: true, $ne: [] }
+  });
+  const totalModules = await Module.countDocuments();
+
+  const enrollmentTrends = await User.aggregate([
+    { $unwind: '$enrolledCourses' },
+    {
+      $group: {
+        _id: {
+          $dateToString: {
+            format: '%Y-%m-%d',
+            date: '$enrolledCourses.enrolledAt'
+          }
+        },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { _id: 1 } }
+  ]);
+  const authStats = await User.aggregate([
+    { $group: { _id: '$authType', count: { $sum: 1 } } }
+  ]);
+  const totalVideoDuration = await Video.aggregate([
+    { $group: { _id: null, totalDuration: { $sum: '$duration' } } }
+  ]);
+  const averageProgress = await User.aggregate([
+    { $unwind: '$enrolledCourses' },
+    {
+      $lookup: {
+        from: 'courses', // Assuming the courses collection is named 'courses'
+        localField: 'enrolledCourses.courseId',
+        foreignField: '_id',
+        as: 'courseDetails'
+      }
+    },
+    { $unwind: '$courseDetails' }, // Unwind to flatten the array of courseDetails
+    {
+      $group: {
+        _id: '$courseDetails._id', // Group by the course's _id
+        title: { $first: '$courseDetails.title' }, // Get the title of the course
+        avgProgress: { $avg: '$enrolledCourses.progress' } // Calculate the average progress
+      }
+    }
+  ]);
+
+  const mostPopularCourse = await Course.findOne()
+    .sort({ enrolledStudents: -1 })
+    .limit(1);
+  const inactiveUsers = await User.countDocuments({
+    enrolledCourses: { $size: 0 }
+  });
+
+  return {
+    totalUsers,
+    activeUsers,
+    totalAdmins,
+    totalCourses,
+    publishedCourses,
+    totalVideos,
+    watchedVideos,
+    totalModules,
+    mostPopularCourse,
+    totalEnrolledStudents,
+    enrollmentTrends,
+    authStats,
+    totalVideoDuration,
+    averageProgress,
+    inactiveUsers
+  };
+};
+
 export {
   create,
   search,
@@ -242,5 +329,6 @@ export {
   getByGitHubId,
   getByGoogleId,
   getEnrolledCoursesService,
-  getUserStatisticsAndCourses
+  getUserStatisticsAndCourses,
+  getAdminDashboardStats
 };

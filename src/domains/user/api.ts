@@ -8,7 +8,8 @@ import {
   updateById,
   deleteById,
   getEnrolledCoursesService,
-  getUserStatisticsAndCourses
+  getUserStatisticsAndCourses,
+  getAdminDashboardStats
 } from './service';
 import { createSchema, updateSchema, idSchema } from './request';
 import { validateRequest } from '../../middlewares/request-validate';
@@ -45,6 +46,18 @@ const routes = (): express.Router => {
       try {
         const enrolledCourses = await getEnrolledCoursesService(userId);
         res.status(200).json(enrolledCourses);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+  router.get(
+    '/admin-stats',
+    logRequest({}),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const stats = await getAdminDashboardStats();
+        res.status(200).json(stats);
       } catch (error) {
         next(error);
       }
