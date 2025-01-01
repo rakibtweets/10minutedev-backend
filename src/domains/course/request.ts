@@ -22,33 +22,6 @@ const createSchema = Joi.object({
       }, 'ObjectId validation')
     )
     .optional(),
-  duration: Joi.alternatives()
-    .try(
-      Joi.number().positive().integer().messages({
-        'number.base': 'Duration must be a number',
-        'number.positive': 'Duration must be positive',
-        'number.integer': 'Duration must be an integer'
-      }),
-      Joi.string()
-    )
-    .custom((value, helpers) => {
-      const coercedValue = Number(value);
-      if (isNaN(coercedValue)) {
-        return helpers.error('any.invalid', {
-          message: 'Duration must be a valid number'
-        });
-      }
-      if (!Number.isInteger(coercedValue) || coercedValue <= 0) {
-        return helpers.error('any.invalid', {
-          message: 'Duration must be a positive integer'
-        });
-      }
-      return coercedValue;
-    })
-    .messages({
-      'alternatives.match':
-        'Duration must be a positive integer or valid string'
-    }), // Duration in minutes
   enrolledStudents: Joi.number().integer().min(0).default(0),
   price: Joi.number().precision(2).min(0).optional(),
   level: Joi.string().valid('beginner', 'intermediate', 'advanced').required(),
@@ -78,34 +51,7 @@ const updateSchema = Joi.object({
       }, 'ObjectId validation')
     )
     .optional(),
-  duration: Joi.alternatives()
-    .try(
-      Joi.number().positive().integer().messages({
-        'number.base': 'Duration must be a number',
-        'number.positive': 'Duration must be positive',
-        'number.integer': 'Duration must be an integer'
-      }),
-      Joi.string()
-    )
-    .custom((value, helpers) => {
-      const coercedValue = Number(value);
-      if (isNaN(coercedValue)) {
-        return helpers.error('any.invalid', {
-          message: 'Duration must be a valid number'
-        });
-      }
-      if (!Number.isInteger(coercedValue) || coercedValue <= 0) {
-        return helpers.error('any.invalid', {
-          message: 'Duration must be a positive integer'
-        });
-      }
-      return coercedValue;
-    })
-    .optional()
-    .messages({
-      'alternatives.match':
-        'Duration must be a positive integer or valid string'
-    }), // Duration in minutes
+  // Duration in minutes
   enrolledStudents: Joi.number().integer().min(0).optional(),
   price: Joi.number().precision(2).min(0).optional(),
   level: Joi.string().valid('beginner', 'intermediate', 'advanced').optional(),
@@ -116,6 +62,10 @@ const updateSchema = Joi.object({
   }),
   isPublished: Joi.boolean().optional()
 }).min(1);
+
+const emailSchema = Joi.object({
+  email: Joi.string().email().required()
+});
 
 const publishSchema = Joi.object({
   isPublished: Joi.boolean().required().messages({
@@ -135,4 +85,4 @@ const idSchema = Joi.object().keys({
     .required()
 });
 
-export { createSchema, updateSchema, idSchema, publishSchema };
+export { createSchema, updateSchema, idSchema, publishSchema, emailSchema };

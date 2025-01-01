@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 import { baseSchema } from '../../libraries/db/base-schema';
 
 export interface ICourse extends Document {
@@ -6,7 +6,7 @@ export interface ICourse extends Document {
   description: string;
   thumbnail: {
     url: string;
-    publicId?: string;
+    publicId?: string | undefined;
   };
   instructor: string;
   modules?: mongoose.Types.ObjectId[];
@@ -16,6 +16,7 @@ export interface ICourse extends Document {
   price?: number;
   level: 'beginner' | 'intermediate' | 'advanced';
   isPublished?: boolean;
+  noOfVideos?: number;
 }
 
 const courseSchema = new Schema<ICourse>({
@@ -36,10 +37,12 @@ const courseSchema = new Schema<ICourse>({
     enum: ['beginner', 'intermediate', 'advanced'],
     required: true
   },
-  isPublished: { type: Boolean, default: false }
+  isPublished: { type: Boolean, default: false },
+  noOfVideos: { type: Number, default: 0 }
 });
 
 courseSchema.add(baseSchema);
 
-export default mongoose.models.Course ||
-  mongoose.model<ICourse>('Course', courseSchema);
+const Course: Model<ICourse> = mongoose.model<ICourse>('Course', courseSchema);
+
+export default Course;

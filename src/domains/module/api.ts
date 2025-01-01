@@ -1,27 +1,19 @@
 import express, { Request, Response, NextFunction } from 'express';
 import logger from '../../libraries/log/logger';
 import { AppError } from '../../libraries/error-handling/AppError';
-import {
-  create,
-  search,
-  getById,
-  updateById,
-  deleteById,
-  getEnrolledCoursesService,
-  getUserStatisticsAndCourses,
-  getAdminDashboardStats
-} from './service';
+
+import { create, search, getById, updateById, deleteById } from './service';
+
 import { createSchema, updateSchema, idSchema } from './request';
 import { validateRequest } from '../../middlewares/request-validate';
 import { logRequest } from '../../middlewares/log';
-import { isAuthenticated } from '../../middlewares/auth/authentication';
 
-const model: string = 'User';
+const model: string = 'Module';
 
 // CRUD for entity
 const routes = (): express.Router => {
   const router = express.Router();
-  logger.info(`Setting up routes for model`);
+  logger.info(`Setting up routes for ${model}`);
 
   router.get(
     '/',
@@ -30,49 +22,6 @@ const routes = (): express.Router => {
       try {
         const items = await search(req.query);
         res.json(items);
-      } catch (error) {
-        next(error);
-      }
-    }
-  );
-
-  // create loggin in user enrolled courses
-  router.get(
-    '/enrolled-courses',
-    logRequest({}),
-    isAuthenticated,
-    async (req: Request, res: Response, next: NextFunction) => {
-      const userId = req.user?._id || '';
-      try {
-        const enrolledCourses = await getEnrolledCoursesService(userId);
-        res.status(200).json(enrolledCourses);
-      } catch (error) {
-        next(error);
-      }
-    }
-  );
-  router.get(
-    '/admin-stats',
-    logRequest({}),
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const stats = await getAdminDashboardStats();
-        res.status(200).json(stats);
-      } catch (error) {
-        next(error);
-      }
-    }
-  );
-
-  router.get(
-    '/dashboard',
-    logRequest({}),
-    isAuthenticated,
-    async (req: Request, res: Response, next: NextFunction) => {
-      const userId = req.user?._id || '';
-      try {
-        const enrolledCourses = await getUserStatisticsAndCourses(userId);
-        res.status(200).json(enrolledCourses);
       } catch (error) {
         next(error);
       }

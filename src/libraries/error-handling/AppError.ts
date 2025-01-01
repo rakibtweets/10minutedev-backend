@@ -11,14 +11,21 @@ class AppError extends Error {
     cause: Error | null = null
   ) {
     super(message);
+    Object.setPrototypeOf(this, AppError.prototype);
     this.name = name;
     this.HTTPStatus = HTTPStatus;
     this.isTrusted = isTrusted;
     this.cause = cause;
-
+    // console.log(this);
     // Setting the prototype explicitly to fix issues with instanceof
-    Object.setPrototypeOf(this, AppError.prototype);
+    Error.captureStackTrace(this, this.constructor);
   }
 }
 
-export { AppError };
+class ValidationError extends AppError {
+  constructor(message: string, cause: Error | null = null) {
+    super('ValidationError', message, 400, true, cause);
+  }
+}
+
+export { AppError, ValidationError };

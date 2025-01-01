@@ -1,8 +1,21 @@
 import express, { Request, Response, NextFunction } from 'express';
 import logger from '../../libraries/log/logger';
 import { AppError } from '../../libraries/error-handling/AppError';
-import { create, search, getById, updateById, deleteById } from './service';
-import { createSchema, updateSchema, idSchema, publishSchema } from './request';
+import {
+  create,
+  search,
+  getById,
+  updateById,
+  deleteById,
+  enrollCourseService
+} from './service';
+import {
+  createSchema,
+  updateSchema,
+  idSchema,
+  publishSchema,
+  emailSchema
+} from './request';
 import { validateRequest } from '../../middlewares/request-validate';
 import { logRequest } from '../../middlewares/log';
 import {
@@ -10,6 +23,7 @@ import {
   uploadToCloudinary
 } from '../../utils/coudinary';
 import Model from './schema';
+import { isAuthenticated } from '../../middlewares/auth/authentication';
 
 const model: string = 'Course';
 
@@ -94,8 +108,8 @@ const routes = (): express.Router => {
           thumbnail.publicId = result.public_id;
           console.log('new thumbnail');
           // delete the old thumbnail
-          if (course?.thumbnail.public_id) {
-            await deleteFromCloudinary(course.thumbnail.public_id);
+          if (course?.thumbnail.publicId) {
+            await deleteFromCloudinary(course?.thumbnail?.publicId);
             console.log('old thumbnail deleted');
           }
         } else {
@@ -120,7 +134,7 @@ const routes = (): express.Router => {
   router.put(
     '/:id/publish',
     logRequest({}),
-    validateRequest({ schema: idSchema, isParam: true }), // Validate :id param
+    validateRequest({ schema: idSchema, isParam: true }),
     validateRequest({ schema: publishSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -156,6 +170,34 @@ const routes = (): express.Router => {
           throw new AppError(`${model} not found`, `${model} not found`, 404);
         }
         res.status(200).json(course);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  router.post(
+    '/:id/enroll',
+    logRequest({}),
+    isAuthenticated,
+    validateRequest({ schema: idSchema, isParam: true }),
+    validateRequest({ schema: emailSchema }),
+    async (req: Request, res: Response, next: NextFunction) => {
+      const { id: courseId } = req.params;
+      const { email } = req.body;
+      const userId = req.user?._id || '';
+      const userEmail = req.user?.email;
+
+      try {
+        // Call the service to handle the enrollment logic
+        const enrolledCourse = await enrollCourseService(
+          courseId,
+          userId,
+          userEmail,
+          email
+        );
+
+        res.status(200).json(enrolledCourse);
       } catch (error) {
         next(error);
       }

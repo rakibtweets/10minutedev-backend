@@ -82,6 +82,6 @@ userSchema.index({ 'google.id': 1 }, { unique: true, sparse: true });
 userSchema.index({ email: 1 }, { unique: true });
 
 // Create and export the model
-const ProductModel: Model<IUser> = mongoose.model<IUser>('User', userSchema);
+const User: Model<IUser> = mongoose.model<IUser>('User', userSchema);
 
-export default ProductModel;
+export default User;
