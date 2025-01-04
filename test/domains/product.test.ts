@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { createExpressApp } from '../../src/server';
-import { search, create, deleteById } from '../../src/domains/product/service';
+import { search, create, deleteById } from '../../src/domains/course/service';
 import { Express } from 'express';
 
 let app: Express | null = null;
@@ -167,7 +167,7 @@ describe('Domains.Products', () => {
 
       it('should return status 204 if the product is successfully deleted', async () => {
         const createResponse = await request(app!)
-          .post('/api/v1/products')
+          .post('/api/v1/courses')
           .send({
             name: 'Sample Product',
             description: 'This is a sample product for demonstration purposes.',
@@ -176,13 +176,13 @@ describe('Domains.Products', () => {
           });
 
         const deleteResponse = await request(app!).delete(
-          `/api/v1/products/${createResponse.body._id}`
+          `/api/v1/courses/${createResponse.body._id}`
         );
         expect(deleteResponse.status).toBe(204);
 
-        // fetch product from database via GET /products/:id
+        // fetch product from database via GET /courses/:id
         const productResponse = await request(app!).get(
-          `/api/v1/products/${createResponse.body._id}`
+          `/api/v1/courses/${createResponse.body._id}`
         );
         expect(productResponse.status).toBe(404);
       });
@@ -190,7 +190,7 @@ describe('Domains.Products', () => {
   });
 
   describe('Service', () => {
-    // setup products
+    // setup courses
     const products = [
       {
         name: 'Product 1',
@@ -216,7 +216,6 @@ describe('Domains.Products', () => {
     // create products and store the ids in an array
     beforeAll(async () => {
       for (const product of products) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         const createdProduct = await create(product);
         productIds.push(createdProduct._id as string);
@@ -239,7 +238,7 @@ describe('Domains.Products', () => {
     it('should filter products by keyword in the name field (case-insensitive)', async () => {
       const result = await search({ keyword: 'product 1' });
       expect(result.length).toBe(1);
-      expect(result[0].name).toBe('Product 1');
+      expect(result[0].title).toBe('Product 1');
     });
     // search filters products by keyword in the description field (case-insensitive)
     it('should filter products by keyword in the description field (case-insensitive)', async () => {
@@ -250,7 +249,7 @@ describe('Domains.Products', () => {
     it('should filter products with keywords matching both name and description fields', async () => {
       const result = await search({ keyword: 'product 3 description' });
       expect(result.length).toBe(1);
-      expect(result[0].name).toBe('Product 3');
+      expect(result[0].title).toBe('Product 3');
     });
   });
 });
