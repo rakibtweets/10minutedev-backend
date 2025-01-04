@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 
 const createSchema = Joi.object({
   title: Joi.string().min(3).max(100).required(),
-  description: Joi.string().min(10).max(1000).required(),
+  description: Joi.string().min(10).required(),
   thumbnail: Joi.object({
     url: Joi.string().required(),
     publicId: Joi.string().optional().allow('')
@@ -35,7 +35,7 @@ const createSchema = Joi.object({
 
 const updateSchema = Joi.object({
   title: Joi.string().min(3).max(100).optional(),
-  description: Joi.string().min(10).max(1000).optional(),
+  description: Joi.string().min(10).optional(),
   thumbnail: Joi.object({
     url: Joi.string().optional(),
     publicId: Joi.string().optional().allow('')
