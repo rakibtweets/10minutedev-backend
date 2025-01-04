@@ -7,6 +7,8 @@ import { create, search, getById, updateById, deleteById } from './service';
 import { createSchema, updateSchema, idSchema } from './request';
 import { validateRequest } from '../../middlewares/request-validate';
 import { logRequest } from '../../middlewares/log';
+import { isAuthenticated } from '../../middlewares/auth/authentication';
+import { isAuthorized } from '../../middlewares/auth/authorization';
 
 const model: string = 'Module';
 
@@ -18,6 +20,7 @@ const routes = (): express.Router => {
   router.get(
     '/',
     logRequest({}),
+    isAuthenticated,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const items = await search(req.query);
@@ -31,6 +34,8 @@ const routes = (): express.Router => {
   router.post(
     '/',
     logRequest({}),
+    isAuthenticated,
+    isAuthorized,
     validateRequest({ schema: createSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -45,6 +50,7 @@ const routes = (): express.Router => {
   router.get(
     '/:id',
     logRequest({}),
+    isAuthenticated,
     validateRequest({ schema: idSchema, isParam: true }),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -62,6 +68,8 @@ const routes = (): express.Router => {
   router.put(
     '/:id',
     logRequest({}),
+    isAuthenticated,
+    isAuthorized,
     validateRequest({ schema: idSchema, isParam: true }),
     validateRequest({ schema: updateSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -80,6 +88,8 @@ const routes = (): express.Router => {
   router.delete(
     '/:id',
     logRequest({}),
+    isAuthenticated,
+    isAuthorized,
     validateRequest({ schema: idSchema, isParam: true }),
     async (req: Request, res: Response, next: NextFunction) => {
       try {

@@ -15,6 +15,7 @@ import { createSchema, updateSchema, idSchema } from './request';
 import { validateRequest } from '../../middlewares/request-validate';
 import { logRequest } from '../../middlewares/log';
 import { isAuthenticated } from '../../middlewares/auth/authentication';
+import { isAuthorized } from '../../middlewares/auth/authorization';
 
 const model: string = 'User';
 
@@ -54,6 +55,8 @@ const routes = (): express.Router => {
   router.get(
     '/admin-stats',
     logRequest({}),
+    isAuthenticated,
+    isAuthorized,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const stats = await getAdminDashboardStats();
@@ -68,6 +71,7 @@ const routes = (): express.Router => {
     '/dashboard',
     logRequest({}),
     isAuthenticated,
+    isAuthorized,
     async (req: Request, res: Response, next: NextFunction) => {
       const userId = req.user?._id || '';
       try {
@@ -82,6 +86,8 @@ const routes = (): express.Router => {
   router.post(
     '/',
     logRequest({}),
+    isAuthenticated,
+    isAuthorized,
     validateRequest({ schema: createSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -113,6 +119,7 @@ const routes = (): express.Router => {
   router.put(
     '/:id',
     logRequest({}),
+    isAuthenticated,
     validateRequest({ schema: idSchema, isParam: true }),
     validateRequest({ schema: updateSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -131,6 +138,7 @@ const routes = (): express.Router => {
   router.delete(
     '/:id',
     logRequest({}),
+    isAuthenticated,
     validateRequest({ schema: idSchema, isParam: true }),
     async (req: Request, res: Response, next: NextFunction) => {
       try {

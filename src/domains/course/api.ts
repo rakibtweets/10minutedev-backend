@@ -24,6 +24,7 @@ import {
 } from '../../utils/coudinary';
 import Model from './schema';
 import { isAuthenticated } from '../../middlewares/auth/authentication';
+import { isAuthorized } from '../../middlewares/auth/authorization';
 
 const model: string = 'Course';
 
@@ -47,7 +48,9 @@ const routes = (): express.Router => {
 
   router.post(
     '/',
-    logRequest({}), // Log only title, instructor, and level
+    logRequest({}),
+    isAuthenticated,
+    isAuthorized,
     validateRequest({ schema: createSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
       const { thumbnail } = req.body;
@@ -90,6 +93,8 @@ const routes = (): express.Router => {
   router.put(
     '/:id',
     logRequest({}),
+    isAuthenticated,
+    isAuthorized,
     validateRequest({ schema: idSchema, isParam: true }),
     validateRequest({ schema: updateSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -134,6 +139,8 @@ const routes = (): express.Router => {
   router.put(
     '/:id/publish',
     logRequest({}),
+    isAuthenticated,
+    isAuthorized,
     validateRequest({ schema: idSchema, isParam: true }),
     validateRequest({ schema: publishSchema }),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -207,6 +214,8 @@ const routes = (): express.Router => {
   router.delete(
     '/:id',
     logRequest({}),
+    isAuthenticated,
+    isAuthorized,
     validateRequest({ schema: idSchema, isParam: true }),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
