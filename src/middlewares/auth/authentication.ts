@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../../libraries/log/logger';
+import { AppError } from '../../libraries/error-handling/AppError';
 
 // Authentication Middleware
 export const isAuthenticated = async (
@@ -8,10 +9,14 @@ export const isAuthenticated = async (
   next: NextFunction
 ) => {
   // Passport's built-in method attached to the request object
-  if (req.isAuthenticated()) {
-    return next(); // User is authenticated, proceed
-  } else {
-    logger.warn('User is not authenticated');
-    return res.status(401).json({ message: 'Unauthorized' });
+  try {
+    if (req.isAuthenticated()) {
+      return next();
+    } else {
+      logger.warn('User is not authenticated');
+      throw new AppError('Unauthenticated', 'User Not authenticated', 401);
+    }
+  } catch (error) {
+    next(error);
   }
 };

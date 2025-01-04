@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../../libraries/error-handling/AppError';
 
 // Authorization Middleware
 export const isAuthorized = (
@@ -6,11 +7,17 @@ export const isAuthorized = (
   res: Response,
   next: NextFunction
 ) => {
-  if (req.user?.isAdmin) {
-    next();
-  } else {
-    res.status(403).json({
-      message: 'Access denied. You are not an admin.'
-    });
+  try {
+    if (req.user?.isAdmin) {
+      next();
+    } else {
+      throw new AppError(
+        'Unauthorized',
+        'Access denied. You are not an admin.',
+        403
+      );
+    }
+  } catch (error) {
+    next(error);
   }
 };
