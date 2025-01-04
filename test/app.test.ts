@@ -19,7 +19,7 @@ describe('App', () => {
       const response = await request(app!).get('/unknown');
       expect(response.status).toBe(404);
       expect(response.error).not.toBeNull();
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
       //@ts-ignore
       expect(response.error.text).toBe('Not Found');
     });

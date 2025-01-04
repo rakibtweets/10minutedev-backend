@@ -33,7 +33,7 @@ class LogManager {
           level: 'error'
         }),
         new transports.File({ filename: `${LOG_DIR}/combined.log` }),
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
         //@ts-ignore
         new transports.DailyRotateFile({
           level: 'info',
