@@ -5,9 +5,8 @@
   "type": "commonjs",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "ts.check": "tsc --project tsconfig.json",
-    "add-build": "git add dist",
     "dev": "nodemon src/start.ts",
+    "start": "nodemon src/start.ts",
     "prod": "node dist/start.js",
     "create-domain": "ts-node scripts/dev/domain-generator.ts",
     "test": "jest",
@@ -79,8 +78,6 @@
     "zx": "^8.1.7"
   },
   "pre-commit": [
-    "ts.check",
-    "build",
-    "add-build"
+    "build"
   ]
 }
