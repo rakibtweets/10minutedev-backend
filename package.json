@@ -8,6 +8,7 @@
     "ts.check": "tsc --project tsconfig.json",
     "add-build": "git add dist",
     "dev": "nodemon src/start.ts",
+    "prod": "nodemon dist/start.js",
     "create-domain": "ts-node scripts/dev/domain-generator.ts",
     "test": "jest",
     "test:watch": "jest --watch",
