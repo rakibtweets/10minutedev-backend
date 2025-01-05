@@ -29,3 +29,4 @@ const disconnectWithMongoDb = async () => {
     logger_1.default.info('Disconnected from MongoDB');
 };
 exports.disconnectWithMongoDb = disconnectWithMongoDb;
+//# sourceMappingURL=index.js.map

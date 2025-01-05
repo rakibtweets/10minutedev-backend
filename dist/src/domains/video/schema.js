@@ -39,3 +39,4 @@ videoSchema.add(base_schema_1.baseSchema);
 // Create and export the model
 const Video = mongoose_1.default.model('Video', videoSchema);
 exports.default = Video;
+//# sourceMappingURL=schema.js.map

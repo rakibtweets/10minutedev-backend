@@ -11,3 +11,4 @@ start()
     .catch((error) => {
     console.error(error);
 });
+//# sourceMappingURL=start.js.map

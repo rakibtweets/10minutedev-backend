@@ -194,3 +194,4 @@ const markVideoAsWatched = async (userId, videoId) => {
     }
 };
 exports.markVideoAsWatched = markVideoAsWatched;
+//# sourceMappingURL=service.js.map

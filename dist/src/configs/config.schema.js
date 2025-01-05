@@ -25,7 +25,7 @@ const schema = joi_1.default.object({
     CLIENT_HOST: joi_1.default.string()
         .pattern(/^(http:\/\/|https:\/\/)/)
         .required(),
-    ADMIN_EMAILS: joi_1.default.array().items(joi_1.default.string()).required(),
-    DEMO: joi_1.default.string().required()
+    ADMIN_EMAILS: joi_1.default.array().items(joi_1.default.string()).required()
 });
 exports.default = schema;
+//# sourceMappingURL=config.schema.js.map

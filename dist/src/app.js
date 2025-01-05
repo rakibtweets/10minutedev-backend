@@ -42,3 +42,4 @@ function defineRoutes(expressApp) {
     logger_1.default.info('Routes defined');
 }
 exports.default = defineRoutes;
+//# sourceMappingURL=app.js.map

@@ -42,3 +42,4 @@ const logRequest = ({ fields = [] } = {}) => {
     };
 };
 exports.logRequest = logRequest;
+//# sourceMappingURL=index.js.map

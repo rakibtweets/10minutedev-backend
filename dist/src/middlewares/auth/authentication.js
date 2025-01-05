@@ -23,3 +23,4 @@ const isAuthenticated = async (req, res, next) => {
     }
 };
 exports.isAuthenticated = isAuthenticated;
+//# sourceMappingURL=authentication.js.map

@@ -20,3 +20,4 @@ const clearAuthInfo = async (userId) => {
     });
 };
 exports.clearAuthInfo = clearAuthInfo;
+//# sourceMappingURL=index.js.map

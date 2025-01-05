@@ -40,3 +40,4 @@ function validateRequest({ schema, isParam = false, isQuery = false }) {
         next();
     };
 }
+//# sourceMappingURL=index.js.map

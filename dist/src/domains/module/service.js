@@ -120,3 +120,4 @@ const deleteById = async (id) => {
     }
 };
 exports.deleteById = deleteById;
+//# sourceMappingURL=service.js.map

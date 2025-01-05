@@ -16,3 +16,4 @@ const baseSchema = new mongoose_1.Schema({
     }
 });
 exports.baseSchema = baseSchema;
+//# sourceMappingURL=base-schema.js.map

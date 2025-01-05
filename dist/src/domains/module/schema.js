@@ -37,3 +37,4 @@ ModuleSchema.add(base_schema_1.baseSchema);
 // Create and export the model
 const Module = mongoose_1.default.model('Module', ModuleSchema);
 exports.default = Module;
+//# sourceMappingURL=schema.js.map

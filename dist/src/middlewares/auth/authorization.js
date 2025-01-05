@@ -17,3 +17,4 @@ const isAuthorized = (req, res, next) => {
     }
 };
 exports.isAuthorized = isAuthorized;
+//# sourceMappingURL=authorization.js.map

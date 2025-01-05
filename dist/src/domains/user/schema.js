@@ -78,3 +78,4 @@ userSchema.index({ email: 1 }, { unique: true });
 // Create and export the model
 const User = mongoose_1.default.model('User', userSchema);
 exports.default = User;
+//# sourceMappingURL=schema.js.map

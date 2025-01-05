@@ -38,3 +38,4 @@ const deleteFromCloudinary = (publicId) => {
 };
 exports.deleteFromCloudinary = deleteFromCloudinary;
 exports.default = cloudinary_1.v2;
+//# sourceMappingURL=coudinary.js.map

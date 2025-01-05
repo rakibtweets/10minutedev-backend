@@ -49,3 +49,4 @@ const courseSchema = new mongoose_1.Schema({
 courseSchema.add(base_schema_1.baseSchema);
 const Course = mongoose_1.default.model('Course', courseSchema);
 exports.default = Course;
+//# sourceMappingURL=schema.js.map

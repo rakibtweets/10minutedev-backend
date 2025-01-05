@@ -21,3 +21,4 @@ class ValidationError extends AppError {
     }
 }
 exports.ValidationError = ValidationError;
+//# sourceMappingURL=AppError.js.map

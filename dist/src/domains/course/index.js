@@ -5,3 +5,4 @@ const defineRoutes = (expressRouter) => {
     expressRouter.use('/courses', (0, api_1.routes)());
 };
 exports.default = defineRoutes;
+//# sourceMappingURL=index.js.map

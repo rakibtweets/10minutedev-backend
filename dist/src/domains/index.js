@@ -14,3 +14,4 @@ const defineRoutes = async (expressRouter) => {
     (0, video_1.default)(expressRouter);
 };
 exports.default = defineRoutes;
+//# sourceMappingURL=index.js.map

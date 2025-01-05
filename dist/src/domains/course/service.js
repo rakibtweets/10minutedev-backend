@@ -150,3 +150,4 @@ const enrollCourseService = async (courseId, userId, userEmail, bodyEmail) => {
     }
 };
 exports.enrollCourseService = enrollCourseService;
+//# sourceMappingURL=service.js.map

@@ -52,3 +52,4 @@ class LogManager {
     }
 }
 exports.default = LogManager.getInstance().getLogger();
+//# sourceMappingURL=logger.js.map

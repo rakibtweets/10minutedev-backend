@@ -26,3 +26,4 @@ const main = async () => {
 };
 // Run the main function
 main();
+//# sourceMappingURL=domain-generator.js.map

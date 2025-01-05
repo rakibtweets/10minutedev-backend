@@ -55,7 +55,6 @@ class Config {
                 finalConfig[key] = config[key]; // Fallback to config file value
             }
         }
-        console.log('config', finalConfig);
         // 4. Load the schema file
         if (!config_schema_1.default) {
             throw new Error('Schema file not found');
@@ -76,3 +75,4 @@ class Config {
 }
 Config.instance = null;
 exports.default = Config.getInstance().config;
+//# sourceMappingURL=index.js.map

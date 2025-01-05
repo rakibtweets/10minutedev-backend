@@ -9,3 +9,4 @@ function context() {
     }
     return currentContext;
 }
+//# sourceMappingURL=context.js.map

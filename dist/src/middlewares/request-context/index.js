@@ -19,3 +19,4 @@ exports.addRequestIdMiddleware = addRequestIdMiddleware;
 // Accessing the request ID in subsequent middleware or routes
 const retrieveRequestId = () => requestContextStore.getStore()?.get('requestId');
 exports.retrieveRequestId = retrieveRequestId;
+//# sourceMappingURL=index.js.map
