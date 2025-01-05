@@ -1,0 +1,5 @@
+{
+    "NODE_ENV": "development",
+    "MONGODB_URI": "mongodb://localhost:27017/test-data-10ms",
+    "PORT": 4000
+}
