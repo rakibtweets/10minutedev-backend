@@ -70,6 +70,8 @@ class Config {
       }
     }
 
+    console.log('config', finalConfig);
+
     // 4. Load the schema file
     if (!schema) {
       throw new Error('Schema file not found');
