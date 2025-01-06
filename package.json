@@ -4,9 +4,9 @@
   "main": "start.ts",
   "type": "commonjs",
   "scripts": {
-    "build": "rimraf dist && tsc",
+    "build": "tsc",
     "dev": "nodemon src/start.ts",
-    "start": "nodemon src/start.ts",
+    "start": "node dist/src/start.js",
     "prod": "node dist/start.js",
     "create-domain": "ts-node scripts/dev/domain-generator.ts",
     "test": "jest",

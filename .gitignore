@@ -129,3 +129,4 @@ out
 config.development.json
 config.production.json
 config.test.json
+.vercel
