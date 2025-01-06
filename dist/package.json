@@ -11,8 +11,7 @@
         "create-domain": "ts-node scripts/dev/domain-generator.ts",
         "test": "jest",
         "test:watch": "jest --watch",
-        "lint": "eslint",
-        "vercel-build": "echo hello"
+        "lint": "eslint"
     },
     "keywords": [],
     "author": "",
