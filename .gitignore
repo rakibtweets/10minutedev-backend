@@ -82,6 +82,8 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
+dist
+dist/
 
 
 # Gatsby files
@@ -129,3 +131,4 @@ out
 config.development.json
 config.production.json
 config.test.json
+.vercel

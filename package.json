@@ -4,15 +4,15 @@
   "main": "start.ts",
   "type": "commonjs",
   "scripts": {
-    "build": "rimraf dist && tsc",
-    "ts.check": "tsc --project tsconfig.json",
-    "add-build": "git add dist",
+    "build": "tsc",
     "dev": "nodemon src/start.ts",
+    "start": "node dist/src/start.js",
     "prod": "node dist/start.js",
     "create-domain": "ts-node scripts/dev/domain-generator.ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint": "eslint"
+    "lint": "eslint",
+    "vercel-build": "echo hello"
   },
   "keywords": [],
   "author": "",
@@ -79,8 +79,6 @@
     "zx": "^8.1.7"
   },
   "pre-commit": [
-    "ts.check",
-    "build",
-    "add-build"
+    "build"
   ]
 }
