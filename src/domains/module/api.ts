@@ -20,7 +20,6 @@ const routes = (): express.Router => {
   router.get(
     '/',
     logRequest({}),
-    isAuthenticated,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const items = await search(req.query);
